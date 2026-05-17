@@ -1,0 +1,14 @@
+function J = costWLS(theta, y_meas_long, t_meas_long, out_idx, ...
+                     scale_long, t_events, u_segment, x0, odeFunc, measFunc, odeOpts)
+% Weighted least-squares cost function for parameter identification.
+% Thin wrapper around simulateLong; all simulation logic lives there.
+%
+%   J = sum_i (1/n_i) * sum_t [ (y_sim_i(t,theta) - y_meas_i(t)) / sigma_i ]^2
+%
+% where the normalisation by n_i and sigma_i is encoded in scale_long.
+
+    y_sim    = simulateLong(theta, t_meas_long, out_idx, t_events, ...
+                            u_segment, x0, odeFunc, measFunc, odeOpts);
+    r_scaled = (y_sim - y_meas_long) ./ scale_long;
+    J        = r_scaled' * r_scaled;
+end
