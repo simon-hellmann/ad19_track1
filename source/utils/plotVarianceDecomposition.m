@@ -16,7 +16,7 @@ function plotVarianceDecomposition(pi_decomp, p, titleStr)
 
     figure('Name', titleStr, 'NumberTitle', 'off');
     barh(1:n, pi_decomp, 'stacked');
-    set(gca, 'YTick', 1:n, 'YTickLabel', p.names);
+    set(gca, 'YTick', 1:n, 'YTickLabel', p.names, 'YDir','reverse'); % flip order of y axis
 
     xlabel('Cumulative variance proportion');
     ylabel('Parameter');

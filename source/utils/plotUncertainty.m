@@ -8,12 +8,12 @@ function plotUncertainty(thetaHat, stdTheta, p, titleStr)
 %   p         -- meta struct with p.nParameters and p.names
 %   titleStr  -- figure title string
 
-    relUnc = 2 * stdTheta(:) ./ abs(thetaHat(:)) * 100;   % [%]
+    relUnc = stdTheta(:) ./ abs(thetaHat(:)) * 100;   % [%]
 
     figure('Name', titleStr, 'NumberTitle', 'off');
     barh(1:p.nParameters, relUnc);
-    set(gca, 'YTick', 1:p.nParameters, 'YTickLabel', p.names);
-    xlabel('2\sigma relative uncertainty [%]');
+    set(gca, 'YTick', 1:p.nParameters, 'YTickLabel', p.names, 'YDir','reverse'); % flip order of y axis
+    xlabel('1 \sigma relative uncertainty [%]');
     title(titleStr, 'Interpreter', 'none');
     grid on; box on;
     xlim([0, max(relUnc) * 1.15]);
