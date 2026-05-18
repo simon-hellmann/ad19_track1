@@ -28,7 +28,7 @@ dataProcessedPath = '../data/processed/';
 % -----------------------------------------------------------------------
 
 % --- raw data file (place in data/raw/) ---------------------------------
-rawFileName = 'MESS_struct.mat';    % update to actual filename
+rawFileName = 'MESS_struct_IntBePro_R36_mod_gasflow.mat';    % update to actual filename
 
 % --- feeding event settings ---------------------------------------------
 delta_feed_min  = 5;               % feeding duration [min]
@@ -65,25 +65,28 @@ fprintf('Done.\n');
 % -----------------------------------------------------------------------
 
 fprintf('Cutting time windows...\n');
-MESS_init  = cutMESS(MESS, T_init_start,  T_init_end);
-MESS_auto  = cutMESS(MESS, T_auto_start,  T_auto_end);
-MESS_cross = cutMESS(MESS, T_cross_start, T_cross_end);
+data_init  = cutMESS(MESS, T_init_start,  T_init_end);
+data_auto  = cutMESS(MESS, T_auto_start,  T_auto_end);
+data_cross = cutMESS(MESS, T_cross_start, T_cross_end);
 
-fprintf('  Init:  %d feed events, t = [0, %.1f] d\n', ...
-    numel(MESS_init.feed.rel_time),  MESS_init.t_span);
-fprintf('  Auto:  %d feed events, t = [0, %.1f] d\n', ...
-    numel(MESS_auto.feed.rel_time),  MESS_auto.t_span);
-fprintf('  Cross: %d feed events, t = [0, %.1f] d\n', ...
-    numel(MESS_cross.feed.rel_time), MESS_cross.t_span);
+t0_init  = 0;
+t0_auto  = days(T_auto_start  - T_init_start);
+t0_cross = days(T_cross_start - T_init_start);
+fprintf('  Init:  %2d feed events, abs. t = [%5.1f, %5.1f] d\n', ...
+    numel(data_init.feed.rel_time),  t0_init,  t0_init  + data_init.t_span);
+fprintf('  Auto:  %2d feed events, abs. t = [%5.1f, %5.1f] d\n', ...
+    numel(data_auto.feed.rel_time),  t0_auto,  t0_auto  + data_auto.t_span);
+fprintf('  Cross: %2d feed events, abs. t = [%5.1f, %5.1f] d\n', ...
+    numel(data_cross.feed.rel_time), t0_cross, t0_cross + data_cross.t_span);
 
 %% -----------------------------------------------------------------------
 %  CONVERT TO PSS DATA FORMAT
 % -----------------------------------------------------------------------
 
 fprintf('Converting to PSS data format...\n');
-data_init  = mess2pssData(MESS_init,  delta_feed_days, rho_substrate);
-data_auto  = mess2pssData(MESS_auto,  delta_feed_days, rho_substrate);
-data_cross = mess2pssData(MESS_cross, delta_feed_days, rho_substrate);
+data_init  = mess2pssData(data_init,  delta_feed_days, rho_substrate);
+data_auto  = mess2pssData(data_auto,  delta_feed_days, rho_substrate);
+data_cross = mess2pssData(data_cross, delta_feed_days, rho_substrate);
 
 %% -----------------------------------------------------------------------
 %  SANITY CHECKS
