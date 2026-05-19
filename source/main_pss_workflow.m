@@ -121,11 +121,11 @@ a = [  0.6555,  0.081837,  0.2245,  -0.016932, -1,      0,      0,      0.11246,
       -26.5447, 6.7367,   18.4808,  -0.15056,   0,      0,      0,      0,       1,  0,  0,  0,  0,       0;
        0,       0,         0,        0,          0.18,  0.77,   0.05,  -1,       0,  0,  0,  0,  0,       0;
        0,       0,         0,        0,          0.18,  0.77,   0.05,   0,      -1,  0,  0,  0,  0,       0;
-       0,       0,         0,        0,          0,      0,      0,      0,       0, -1,  0,  0,  0,       0;
-       0,       0,         0,        0,          0,      0,      0,      0,       0,  0, -1,  0,  0,       0;
-       0,       0,         0,        0,          0,      0,      0,      0,       0,  0,  0, -1,  0,       0;
-       0,      -1,         0,        0,          0,      0,      0,      0,       0,  0,  0,  0,  c(31),  0;
-       0,       0,        -1,        0,          0,      0,      0,      0,       0,  0,  0,  0,  0,       c(31)]';
+       0,       0,         0,        0,          0,      0,      0,      0,      0, -1,  0,  0,  0,       0;
+       0,       0,         0,        0,          0,      0,      0,      0,      0,  0, -1,  0,  0,       0;
+       0,       0,         0,        0,          0,      0,      0,      0,      0,  0,  0, -1,  0,       0;
+       0,      -1,         0,        0,          0,      0,      0,      0,      0,  0,  0,  0,  c(31),   0;
+       0,       0,        -1,        0,          0,      0,      0,      0,      0,  0,  0,  0,  0,       c(31)]';
 
 % --- ODE and measurement function handles --------------------------------
 % Inlet composition xi is fed per-segment from data.xi_feed, not captured
@@ -138,11 +138,10 @@ measFunc = @(x, theta)        ADM1_R3_core_mgl_sym_pi(x, theta, c);
 % --- ODE solver options -------------------------------------------------
 % Loose tolerances for use inside the fmincon objective function:
 % ~3-5x faster per ODE call with negligible effect on the optimum location.
-% NonNegative enforces non-negativity on the 10 biological concentration
+% NonNegative enforces non-negativity on the (biological) concentration
 % states (sugars, amino acids, fatty acids, acetate, biomass fractions).
 % This prevents ode15s from driving concentrations below zero during the
-% optimizer's parameter search, which is the primary cause of the
-% "unable to meet tolerances" step-size collapse warning.
+% optimizer's parameter search:
 non_negative_idx = 1:14;
 odeOptsOpt  = odeset('RelTol', 1e-4, 'AbsTol', 1e-6, 'MaxStep', 0.5, ...
                      'NonNegative', non_negative_idx);

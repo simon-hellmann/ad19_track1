@@ -1,0 +1,57 @@
+J(theta0) = 4.688e+04  (normalization factor)
+Running PI1 with fmincon...
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+    0      19    1.000000e+00    0.000e+00    5.962e+02
+    1      39    5.130635e-01    0.000e+00    9.211e+01    4.672e-01
+    2      60    3.047565e-01    0.000e+00    1.458e+02    1.382e-01
+    3      90    2.552670e-01    0.000e+00    1.648e+02    2.362e-03
+    4     116    2.085717e-01    0.000e+00    6.177e+01    4.097e-04
+
+Optimization stopped because the relative changes in all elements of x are
+less than options.StepTolerance = 1.000000e-10, and the relative maximum constraint
+violation, 0.000000e+00, is less than options.ConstraintTolerance = 1.000000e-06.
+
+Computing FD sensitivities (parfor)...
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 8 workers.
+Computing FD sensitivities of param 4 of 9...Computing FD sensitivities of param 3 of 9...Computing FD sensitivities of param 5 of 9...Computing FD sensitivities of param 1 of 9...Computing FD sensitivities of param 7 of 9...Computing FD sensitivities of param 6 of 9...Computing FD sensitivities of param 2 of 9...Computing FD sensitivities of param 9 of 9...Computing FD sensitivities of param 8 of 9...Parallel pool using the 'Processes' profile is shutting down.
+
+PSS result: 8 / 9 parameters are identifiable.
+Identifiable parameters:
+  Columns 1 through 6
+
+    {'\Delta S_{ion}'}    {'k_{m,ac}'}    {'k_{ch}'}    {'k_{dec}'}    {'\phi_{IN}'}    {'k_{pr}'}
+
+  Columns 7 through 8
+
+    {'k_{li}'}    {'K_{S,ac}'}
+
+Running PI2 with fmincon...
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+    0      17    2.004957e+00    0.000e+00    3.845e+01
+    1      37    1.551317e+00    0.000e+00    7.051e+01    1.771e-01
+    2      57    1.403133e+00    0.000e+00    1.959e+01    1.143e-01
+    3      74    6.137633e-01    0.000e+00    6.224e+01    7.443e-01
+    4      92    4.128571e-01    0.000e+00    3.769e+01    1.254e-01
+    5     112    1.809548e-01    0.000e+00    9.986e+00    2.922e-02
+    6     130    3.436956e-01    0.000e+00    7.340e+01    2.827e-01
+    7     160    3.132488e-01    0.000e+00    6.457e+01    7.338e-04
+    8     178    3.059338e-01    0.000e+00    2.507e+01    1.295e-03
+    9     197    2.267816e-01    0.000e+00    7.960e+01    1.040e-01
+   10     221    1.464141e-01    0.000e+00    7.729e+00    2.207e-02
+
+Optimization stopped because the relative changes in all elements of x are
+less than options.StepTolerance = 1.000000e-10, and the relative maximum constraint
+violation, 0.000000e+00, is less than options.ConstraintTolerance = 1.000000e-06.
+
+Computing FD sensitivities (parfor)...
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 8 workers.
+Parallel pool using the 'Processes' profile is shutting down.
+
+=== RMSE Summary ===
+Configuration                   Train  |  CV
+PI #1 (full set)                0.0844 | 0.1111
+PI #2 (PSS subset)              0.1523 | 0.0923

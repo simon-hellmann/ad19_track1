@@ -16,8 +16,8 @@ function plotCIComparison(thetaHat1, stdTheta1, thetaHat2, stdTheta2_sub, ...
 %   p              -- meta struct with p.names
 %   titleStr       -- figure title string
 
-    relUnc1 = 2 * stdTheta1(keep_idx) ./ abs(thetaHat1(keep_idx)) * 100;
-    relUnc2 = 2 * stdTheta2_sub(:)    ./ abs(thetaHat2(keep_idx)) * 100;
+    relUnc1 = stdTheta1(keep_idx) ./ abs(thetaHat1(keep_idx)) * 100;
+    relUnc2 = stdTheta2_sub(:)    ./ abs(thetaHat2(keep_idx)) * 100;
     n_keep  = numel(keep_idx);
 
     figure('Name', titleStr, 'NumberTitle', 'off');
@@ -28,7 +28,7 @@ function plotCIComparison(thetaHat1, stdTheta1, thetaHat2, stdTheta2_sub, ...
     bh(2).DisplayName = 'PI #2 (PSS subset)';
 
     set(gca, 'YTick', 1:n_keep, 'YTickLabel', p.names(keep_idx));
-    xlabel('2\sigma relative uncertainty [%]');
+    xlabel('rel. std. deviation [%]');
     legend('Location', 'best');
     title(titleStr, 'Interpreter', 'none');
     grid on; box on;
