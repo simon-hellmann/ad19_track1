@@ -46,102 +46,24 @@ rng(42);
 %  2. MODEL DEFINITION & NOMINAL PARAMETERS
 % -----------------------------------------------------------------------
 
-% TODO: move model parameter processing into utils
-
-% --- Reactor dimensions ----------------------------------------------------
+% --- Reactor dimensions --------------------------------------------------
 V_liq = 0.012;   % liquid volume [m^3]
 V_gas = 0.003;   % gas headspace volume [m^3]
 
-% --- Load ADM1 fixed physico-chemical constants -------------------------
-% Sourced from Soeren Weinrich/ADM1: 
+% --- Load ADM1 physico-chemical constants --------------------------------
 addpath('model_files/model_data');
 load('ADM1_parameters.mat', 'parameters');
 parameters_r3 = parameters.ADM1_R3;
 
-p_atm    = 1.01325;       % atmospheric pressure [bar]
-T_K      = 0 + 273.15;    % standard temperature [K]
-p_h2o    = 0;             % dry biogas assumption [bar]
+% --- Assemble model (ADM1-R3) --------------------------------------------
+% Returns c, a, odeFunc, measFunc, theta0, bounds, and metadata struct p.
+% To switch models, replace this call (e.g. setup_ADM1_R3x1).
+[c, a, odeFunc, measFunc, theta0, thetaLB, thetaUB, p] = ...
+    setup_ADM1_R3(parameters_r3, V_liq, V_gas);
 
-K_H_ch4  = parameters_r3{1,:};   K_H_co2  = parameters_r3{2,:};
-K_S_IN   = parameters_r3{3,:};   K_I_nh3  = parameters_r3{4,:};
-K_a_IN   = parameters_r3{5,:};   K_a_ac   = parameters_r3{6,:};
-K_a_co2  = parameters_r3{7,:};   K_S_ac   = parameters_r3{8,:};
-K_w      = parameters_r3{9,:};   R_gas    = parameters_r3{10,:};
-k_AB_IN  = parameters_r3{12,:};  k_AB_ac  = parameters_r3{13,:};
-k_AB_co2 = parameters_r3{14,:};  k_La     = parameters_r3{15,:};
-k_p      = parameters_r3{20,:};
-pK_l_ac  = parameters_r3{22,:};  pK_u_ac  = parameters_r3{23,:};
-
-M_ch4 = 16;   M_co2 = 44;
-n_ac  = 3 / (pK_u_ac - pK_l_ac);
-
-% --- Assemble vector of time-invariant parameters c (31 x 1) --------------------------------
-c = nan(31, 1);
-c(1)  = 1 / V_liq;
-c(2)  = n_ac;
-c(3)  = 10^(-(3/2) * (pK_u_ac + pK_l_ac) / (pK_u_ac - pK_l_ac));
-c(4)  = 4 * K_w;
-c(5)  = k_La;
-c(6)  = k_La * K_H_ch4 * R_gas * T_K;
-c(7)  = k_La * K_H_co2 * R_gas * T_K;
-c(8)  = K_S_IN;
-c(9)  = k_AB_ac;
-c(10) = k_AB_co2;
-c(11) = k_AB_IN;
-c(12) = k_La * V_liq / V_gas;
-c(13) = k_p / p_atm * (R_gas * T_K / M_ch4)^2;
-c(14) = 2 * k_p / p_atm * (R_gas * T_K)^2 / M_ch4 / M_co2;
-c(15) = k_p / p_atm * (R_gas * T_K / M_co2)^2;
-c(16) = k_p / p_atm * R_gas * T_K / M_ch4 * (2*p_h2o - p_atm);
-c(17) = k_p / p_atm * R_gas * T_K / M_co2 * (2*p_h2o - p_atm);
-c(18) = k_p / p_atm * (p_h2o - p_atm) * p_h2o;
-c(19) = R_gas * T_K / M_ch4;
-c(20) = R_gas * T_K / M_co2;
-c(21) = -k_p / V_gas / p_atm * (R_gas * T_K / M_ch4)^2;
-c(22) = -2 * k_p / V_gas / p_atm * (R_gas * T_K)^2 / M_ch4 / M_co2;
-c(23) = -k_p / V_gas / p_atm * (R_gas * T_K / M_co2)^2;
-c(24) = -k_p / V_gas / p_atm * (R_gas * T_K / M_ch4) * (2*p_h2o - p_atm);
-c(25) = -k_p / V_gas / p_atm * (R_gas * T_K / M_co2) * (2*p_h2o - p_atm);
-c(26) = -k_La * V_liq / V_gas * K_H_ch4 * R_gas * T_K ...
-        - k_p / V_gas / p_atm * (p_h2o - p_atm) * p_h2o;
-c(27) = -k_La * V_liq / V_gas * K_H_co2 * R_gas * T_K ...
-        - k_p / V_gas / p_atm * (p_h2o - p_atm) * p_h2o;
-c(28) = k_AB_ac  * K_a_ac;
-c(29) = k_AB_co2 * K_a_co2;
-c(30) = k_AB_IN  * K_a_IN;
-c(31) = V_liq / V_gas;
-
-% --- Petersen stoichiometry matrix a (14 states x 11 reactions) ---------
-% Rows: states; columns: reactions (ch, pr, li, dec, X_ac-dec, X_su-dec,
-%   X_aa-dec, ac-methanogenesis, [rest gas/liq]).
-% c(31) = V_liq/V_gas appears in the gas-phase rows.
-a = [  0.6555,  0.081837,  0.2245,  -0.016932, -1,      0,      0,      0.11246, 0,  0,  0,  0,  0,       0;
-       0.9947,  0.069636,  0.10291,  0.17456,   0,     -1,      0,      0.13486, 0,  0,  0,  0,  0,       0;
-       1.7651,  0.19133,  -0.64716, -0.024406,  0,      0,     -1,      0.1621,  0,  0,  0,  0,  0,       0;
-      -26.5447, 6.7367,   18.4808,  -0.15056,   0,      0,      0,      0,       1,  0,  0,  0,  0,       0;
-       0,       0,         0,        0,          0.18,  0.77,   0.05,  -1,       0,  0,  0,  0,  0,       0;
-       0,       0,         0,        0,          0.18,  0.77,   0.05,   0,      -1,  0,  0,  0,  0,       0;
-       0,       0,         0,        0,          0,      0,      0,      0,      0, -1,  0,  0,  0,       0;
-       0,       0,         0,        0,          0,      0,      0,      0,      0,  0, -1,  0,  0,       0;
-       0,       0,         0,        0,          0,      0,      0,      0,      0,  0,  0, -1,  0,       0;
-       0,      -1,         0,        0,          0,      0,      0,      0,      0,  0,  0,  0,  c(31),   0;
-       0,       0,        -1,        0,          0,      0,      0,      0,      0,  0,  0,  0,  0,       c(31)]';
-
-% --- ODE and measurement function handles --------------------------------
-% Inlet composition xi is fed per-segment from data.xi_feed, not captured
-% as a constant.  c and a are captured in the closures.
-%   odeFunc(x, u, xi, theta)  ->  f (state derivative, n_states x 1)
-%   measFunc(x, theta)        ->  g (6 outputs: gasflow, pCH4, pCO2, pH, SIN, Sac)
-odeFunc  = @(x, u, xi, theta) ADM1_R3_core_ode_sym_pi(x, u, xi, theta, c, a);
-measFunc = @(x, theta)        ADM1_R3_core_mgl_sym_pi(x, theta, c);
-
-% --- ODE solver options -------------------------------------------------
-% Loose tolerances for use inside the fmincon objective function:
-% ~3-5x faster per ODE call with negligible effect on the optimum location.
-% NonNegative enforces non-negativity on the (biological) concentration
-% states (sugars, amino acids, fatty acids, acetate, biomass fractions).
-% This prevents ode15s from driving concentrations below zero during the
-% optimizer's parameter search:
+% --- ODE solver options --------------------------------------------------
+% Loose tolerances inside fmincon (~3-5x faster, negligible effect on optimum).
+% NonNegative prevents ode15s driving biological concentration states below zero.
 non_negative_idx = 1:14;
 odeOptsOpt  = odeset('RelTol', 1e-4, 'AbsTol', 1e-6, 'MaxStep', 0.5, ...
                      'NonNegative', non_negative_idx);
@@ -149,35 +71,9 @@ odeOptsOpt  = odeset('RelTol', 1e-4, 'AbsTol', 1e-6, 'MaxStep', 0.5, ...
 odeOptsPost = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'MaxStep', 0.5, ...
                      'NonNegative', non_negative_idx);
 
-% --- Parameter vector: theta = [k_ch, k_pr, k_li, k_dec, k_m_ac, -------
-%                                K_S_ac, K_I_nh3, Delta_S_ion, phi_IN]  --
-% standard values from Dissertation Weinrich (2017) (except last 2 params):
-theta0 = [parameters_r3{16,:};  % k_ch      [1/d]
-          parameters_r3{21,:};  % k_pr      [1/d]
-          parameters_r3{18,:}   % k_li      [1/d]
-          parameters_r3{17,:};  % k_dec     [1/d]
-          parameters_r3{19,:};  % k_m_ac    [1/d]
-          parameters_r3{8,:};   % K_S_ac    [g/L]
-          parameters_r3{4,:};   % K_I_nh3   [g/L]
-          0.15 - 0.02;          % Delta_S_ion [g/L] (effective ion correction)
-          1];                   % phi_IN    [-]     (IN inlet scaling)
-
-thetaLB = [2e-2;  1e-2;  1e-2;  1e-3;  1e-1;  1e-3;  1e-2;  -1e-2;  1e-1];
-thetaUB = [1e1;   1e1;   1;     1;     1;     2;     1e1;   1;      2  ];
-
 % --- Output measurement noise standard deviations -----------------------
-% One value per output; same sensor characteristics assumed for all windows.
 % Units: [m^3/d, bar, bar, -, g/L, g/L]
 sigmaY = [4e-4, 1.78e-2, 2.68e-2, 2e-2, 0.12, 5e-2];
-
-% --- Meta struct for plot functions -------------------------------------
-p.nParameters = numel(theta0);
-p.names       = {'k_{ch}','k_{pr}','k_{li}','k_{dec}', ...
-                  'k_{m,ac}','K_{S,ac}','K_{I,nh3}','\Delta S_{ion}','\phi_{IN}'};
-p.units       = {'1/d','1/d','1/d','1/d','1/d','g/L','g/L','mol/L','-'};
-p.nOutputs    = 6;
-p.outputNames = {'q_{gas}','p_{CH4}','p_{CO2}','pH','S_{IN}','S_{ac}'};
-p.outputUnits = {'m^3/d','bar','bar','-','g/L','g/L'};
 
 %% -----------------------------------------------------------------------
 %  3. LOAD & PREPARE DATASETS
@@ -297,7 +193,7 @@ end
 %     starting from the steady state.  The terminal state is x0.
 
 % rough initial state (n_states x 1), cf. Hellmann et al. (2026), DOI: 10.1016/j.jprocont.2026.103703
-x0_rough = [0.049; % S_ac 
+x0_init = [0.049; % S_ac 
             0.012; % S_ch4
             4.975; % S_IC
             0.964; % S_IN
@@ -312,7 +208,61 @@ x0_rough = [0.049; % S_ac
             0.358; % S_ch4_gas
             0.660];% S_co2_gas
 t_ss     = 500;     % [d] pre-simulation duration for steady-state
-x0 = computeX0(theta0, data_init, t_ss, x0_rough, odeFunc, odeOptsPost);
+x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsPost);
+
+%% -----------------------------------------------------------------------
+%  4b. LATIN HYPERCUBE SAMPLING -- GLOBAL PRE-SEARCH FOR PI #1
+% -----------------------------------------------------------------------
+%
+%  Draws N_LHS parameter vectors via Latin Hypercube Sampling over the full
+%  parameter bounds, evaluates the cost function at each, and selects the
+%  best candidate as the starting point for PI #1.
+%
+%  Sampling scale:
+%    - Parameters 1-7 and 9 (strictly positive bounds): log10-scale.
+%    - Parameter 8 (Delta_S_ion, LB = -1e-2 < 0): linear scale.
+
+N_LHS     = 50;
+n_theta   = numel(theta0);
+J_penalty = 1e10;   % also used in section 5
+
+log_idx = setdiff(1:n_theta, 8);   % all parameters except Delta_S_ion
+lin_idx = 8;                       % Delta_S_ion: bounds straddle zero -> linear
+
+% LHS design in [0,1]^n_theta
+lhs_unit = lhsdesign(N_LHS, n_theta);   % (N_LHS x n_theta)
+
+% Map unit hypercube to physical parameter space
+theta_lhs = nan(N_LHS, n_theta);
+for k = log_idx
+    lo = log10(thetaLB(k));
+    hi = log10(thetaUB(k));
+    theta_lhs(:, k) = 10.^(lo + lhs_unit(:, k) .* (hi - lo));
+end
+theta_lhs(:, lin_idx) = thetaLB(lin_idx) + ...
+    lhs_unit(:, lin_idx) .* (thetaUB(lin_idx) - thetaLB(lin_idx));
+
+% Evaluate cost at each LHS sample (optimization-grade ODE tolerances)
+fprintf('Evaluating cost at %d LHS samples (parfor)...\n', N_LHS);
+J_lhs = nan(N_LHS, 1);
+maxNumCores = feature('numCores');
+if isempty(gcp('nocreate'))
+    parpool(maxNumCores, 'IdleTimeout', Inf); % pool that never loses connection
+end
+tic_lhs = tic;
+parfor i_lhs = 1:N_LHS
+    J_lhs(i_lhs) = costWLS(theta_lhs(i_lhs, :)', y_meas_long, t_meas_long, ...
+        out_idx, scale_long, t_events, u_segments, xi_segments, x0, ...
+        odeFunc, measFunc, odeOptsOpt, J_penalty);
+end
+computing_time_lhs = toc(tic_lhs); % [s]
+fprintf('LHS done.  Cost range: [%.4g, %.4g]  (%.1f s)\n', min(J_lhs), max(J_lhs), computing_time_lhs);
+delete(gcp('nocreate'));
+
+% Best LHS candidate becomes the starting point for PI #1
+[J0, lhs_best_idx] = min(J_lhs);
+theta_lhs_best    = theta_lhs(lhs_best_idx, :)';
+fprintf('Best LHS candidate: sample #%d,  J = %.4g\n', lhs_best_idx, min(J_lhs));
 
 %% -----------------------------------------------------------------------
 %  5. PI #1 -- MAX LIKELIHOOD ESTIMATION ON FULL PARAMETER VECTOR (fmincon)
@@ -323,10 +273,7 @@ x0 = computeX0(theta0, data_init, t_ss, x0_rough, odeFunc, odeOptsPost);
 % See utils/simulateLong.m -- piecewise ODE integration then long-vector assembly.
 % See utils/costWLS.m      -- thin wrapper: residuals + J = r'*r.
 
-% Penalty returned by costWLS when the ODE solver fails (non-finite output).
-% Must be large enough that fmincon treats it as infeasible and backtracks,
-% but finite so that it does not propagate NaN into the gradient.
-J_penalty = 1e10;
+% J_penalty is defined in section 4b above.
 
 % Evaluate cost at theta0 once (with optimization tolerances) to normalize J.
 % Dividing by J0 brings the cost to O(1) at the start, which keeps the
@@ -351,10 +298,10 @@ opts1 = optimoptions('fmincon', ...
     'FiniteDifferenceStepSize', fd_stepSize, ... 
     'FiniteDifferenceType',     'central');
 
-% --- Run PI #1 ----------------------------------------------------------
+% --- Run PI #1 (starting from best LHS candidate) -----------------------
 disp("Running PI1 with fmincon...")
-tic_pi1 = tic; 
-[thetaHat1, fval1_norm, exitflag1, output1] = fmincon(objFun1, theta0, ...
+tic_pi1 = tic;
+[thetaHat1, fval1_norm, exitflag1, output1] = fmincon(objFun1, theta_lhs_best, ...
     [], [], [], [], thetaLB, thetaUB, [], opts1);
 computing_time_pi1 = toc(tic_pi1); % [s]
 
@@ -394,13 +341,12 @@ N_long       = numel(t_meas_long);
 dydth1_raw   = nan(N_long, p.nParameters); 
 
 disp("Computing FD sensitivities (parfor)...")
-maxNumCores = feature('numCores');
 if isempty(gcp('nocreate'))
     parpool(maxNumCores,'IdleTimeout',Inf); % pool that never loses connection
 end
 
 parfor k = 1:p.nParameters
-    fprintf("Computing FD sensitivities of param %i of %i...", k, p.nParameters) 
+    fprintf("Computing FD sensitivities of param %i of %i...\n", k, p.nParameters); 
     delta_k   = h_rel * abs(thetaHat1(k));
     if delta_k == 0;  delta_k = h_rel;  end
 
@@ -484,7 +430,7 @@ plotVarianceDecomposition(pi_decomp, p, 'PSS --variance decomposition');
 % is no longer the best initial condition.  Repeat the same two-step
 % procedure with thetaHat1 to obtain x0_2.
 
-x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_rough, odeFunc, odeOptsPost);
+x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost);
 
 % For cross-validation, data_cross immediately follows data_auto in time,
 % so x0_CV is the terminal state of the auto simulation (captured in §6).
