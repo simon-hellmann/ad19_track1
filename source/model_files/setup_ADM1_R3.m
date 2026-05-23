@@ -1,32 +1,46 @@
-function [c, a, odeFunc, measFunc, theta0, thetaLB, thetaUB, p] = setup_ADM1_R3(parameters_r3, V_liq, V_gas)
+%% setup_ADM1_R3.m
 % Assemble all model-specific quantities for ADM1-R3.
 %
-% Inputs:
-%   parameters_r3  -- cell array of ADM1-R3 physico-chemical constants
-%                     (from ADM1_parameters.mat, Weinrich 2017)
-%   V_liq          -- liquid volume [m^3]
-%   V_gas          -- gas headspace volume [m^3]
+% Author: Simon Hellmann. Created: 2026/05/23. Version: Matlab R2022b, Update 6
 %
-% Outputs:
-%   c              -- (31x1) time-invariant parameter vector
-%   a              -- (14x11) Petersen stoichiometry matrix
-%   odeFunc        -- @(x,u,xi,theta) state derivative
-%   measFunc       -- @(x,theta) output vector (6 outputs)
-%   theta0         -- (9x1) nominal tunable parameter vector
-%   thetaLB        -- (9x1) lower bounds for theta
-%   thetaUB        -- (9x1) upper bounds for theta
-%   p              -- metadata struct (names, units, counts)
+%% Output
+%
+%   c:          (31x1) time-invariant parameter vector
+%   a:          (14x11) Petersen stoichiometry matrix
+%   odeFunc:    @(x, u, xi, theta) state derivative  (wraps ADM1_R3_core_ode)
+%   measFunc:   @(x, theta) output vector            (wraps ADM1_R3_core_output)
+%   theta0:     (9x1) nominal tunable parameter vector
+%   thetaLB:    (9x1) lower bounds for theta
+%   thetaUB:    (9x1) upper bounds for theta
+%   p:          metadata struct. Fields:
+%               .nParameters    number of tunable parameters
+%               .names          LaTeX parameter names  (1 x nP cell)
+%               .units          parameter unit strings (1 x nP cell)
+%               .nOutputs       number of model outputs
+%               .outputNames    LaTeX output names     (1 x nO cell)
+%               .outputUnits    output unit strings    (1 x nO cell)
+%
+%% Input
+%
+%   parameters_r3:  cell array of ADM1-R3 physico-chemical constants
+%                   (from ADM1_parameters.mat, Weinrich 2017)
+%   V_liq:          liquid volume                                [m^3]
+%   V_gas:          gas headspace volume                         [m^3]
 %
 % Tunable parameters (theta):
-%   th(1) k_ch        [1/d]   -- hydrolysis rate, carbohydrates
-%   th(2) k_pr        [1/d]   -- hydrolysis rate, proteins
-%   th(3) k_li        [1/d]   -- hydrolysis rate, lipids
-%   th(4) k_dec       [1/d]   -- decay rate (all biomass)
-%   th(5) k_m_ac      [1/d]   -- max. acetoclastic methanogenesis rate
-%   th(6) K_S_ac      [g/L]   -- half-saturation constant, acetate
-%   th(7) K_I_nh3     [g/L]   -- NH3 inhibition constant
-%   th(8) Delta_S_ion [g/L]   -- effective ion correction (ion balance)
-%   th(9) phi_IN      [-]     -- IN inlet scaling factor
+%   th(1)  k_ch         hydrolysis rate, carbohydrates          [1/d]
+%   th(2)  k_pr         hydrolysis rate, proteins               [1/d]
+%   th(3)  k_li         hydrolysis rate, lipids                 [1/d]
+%   th(4)  k_dec        decay rate, all biomass                 [1/d]
+%   th(5)  k_m_ac       max. acetoclastic methanogenesis rate   [1/d]
+%   th(6)  K_S_ac       half-saturation constant, acetate       [g/L]
+%   th(7)  K_I_nh3      NH3 inhibition constant                 [g/L]
+%   th(8)  Delta_S_ion  effective ion correction (ion balance)  [g/L]
+%   th(9)  phi_IN       IN inlet scaling factor                 [-]
+%
+
+function [c, a, odeFunc, measFunc, theta0, thetaLB, thetaUB, p] = setup_ADM1_R3( ...
+    parameters_r3, V_liq, V_gas)
 
 % --- Physico-chemical constants ------------------------------------------
 p_atm    = 1.01325;   % atmospheric pressure [bar]
@@ -96,8 +110,8 @@ a = [  0.6555,  0.081837,  0.2245,  -0.016932, -1,      0,      0,      0.11246,
        0,       0,        -1,        0,          0,      0,      0,      0,      0,  0,  0,  0,  0,       c(31)]';
 
 % --- ODE and measurement function handles --------------------------------
-odeFunc  = @(x, u, xi, theta) ADM1_R3_core_ode_sym_pi(x, u, xi, theta, c, a);
-measFunc = @(x, theta)        ADM1_R3_core_mgl_sym_pi(x, theta, c);
+odeFunc  = @(x, u, xi, theta) ADM1_R3_core_ode(x, u, xi, theta, c, a);
+measFunc = @(x, theta)        ADM1_R3_core_output(x, theta, c);
 
 % --- Tunable parameter vector theta (9 x 1) ------------------------------
 % Nominal values from Weinrich (2017), except Delta_S_ion and phi_IN.
@@ -123,4 +137,4 @@ p.nOutputs    = 6;
 p.outputNames = {'q_{gas}','p_{CH4}','p_{CO2}','pH','S_{IN}','S_{ac}'};
 p.outputUnits = {'m^3/d','bar','bar','-','g/L','g/L'};
 
-end
+end % fun

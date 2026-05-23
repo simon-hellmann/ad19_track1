@@ -64,12 +64,12 @@ parameters_r3 = parameters.ADM1_R3;
 % --- ODE solver options --------------------------------------------------
 % Loose tolerances inside fmincon (~3-5x faster, negligible effect on optimum).
 % NonNegative prevents ode15s driving biological concentration states below zero.
-non_negative_idx = 1:14;
+non_negative_state_idx = 1:14;
 odeOptsOpt  = odeset('RelTol', 1e-4, 'AbsTol', 1e-6, 'MaxStep', 0.5, ...
-                     'NonNegative', non_negative_idx);
+                     'NonNegative', non_negative_state_idx);
 % Tight tolerances for post-processing (FD sensitivity, CV, plots):
 odeOptsPost = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'MaxStep', 0.5, ...
-                     'NonNegative', non_negative_idx);
+                     'NonNegative', non_negative_state_idx);
 
 % --- Output measurement noise standard deviations -----------------------
 % Units: [m^3/d, bar, bar, -, g/L, g/L]
@@ -272,8 +272,6 @@ fprintf('Best LHS candidate: sample #%d,  J = %.4g\n', lhs_best_idx, min(J_lhs))
 %
 % See utils/simulateLong.m -- piecewise ODE integration then long-vector assembly.
 % See utils/costWLS.m      -- thin wrapper: residuals + J = r'*r.
-
-% J_penalty is defined in section 4b above.
 
 % Evaluate cost at theta0 once (with optimization tolerances) to normalize J.
 % Dividing by J0 brings the cost to O(1) at the start, which keeps the
