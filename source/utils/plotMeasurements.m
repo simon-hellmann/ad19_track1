@@ -1,8 +1,8 @@
-%% plotFitComparison.m
-% Overlay PI #1 and PI #2 simulations against measurements, with feed rate on top.
-% Shows that fit quality is preserved after PSS.
+%% plotMeasurements.m
+% Plot raw measurement data for each output channel, with feed rate on top.
+% One subplot per output channel plus one subplot for the feed rate.
 %
-% Author: Simon Hellmann. Created: 2026/05/17. Version: Matlab R2022b, Update 6
+% Author: Simon Hellmann. Created: 2026/05/23. Version: Matlab R2022b, Update 6
 %
 %% Output
 %
@@ -12,8 +12,6 @@
 %
 %   t_meas_long:    (N_long x 1) measurement times, long vector        [d]
 %   y_meas_long:    (N_long x 1) measured values, long vector
-%   y_sim_long1:    (N_long x 1) PI #1 simulated values
-%   y_sim_long2:    (N_long x 1) PI #2 simulated values
 %   out_idx:        (N_long x 1) output channel index per entry        [1..n_out]
 %   p:              metadata struct. Fields used:
 %                   .nOutputs     number of output channels
@@ -21,39 +19,32 @@
 %                   .outputUnits  output unit strings (1 x nO cell)
 %   t_events:       (n_ev x 1) feed-event time grid                    [d]
 %   u_segments:     (n_ev-1 x 1) feed rate per segment                 [m^3/d]
-%   titleStr:       figure title string
+%   title_str:      figure title string
 %
 
-function plotFitComparison(t_meas_long, y_meas_long, y_sim_long1, y_sim_long2, ...
-    out_idx, p, t_events, u_segments, titleStr)
+function plotMeasurements(t_meas_long, y_meas_long, out_idx, p, ...
+    t_events, u_segments, title_str)
 
 n_rows = p.nOutputs + 1;
 
-figure('Name',titleStr, 'NumberTitle','off');
+figure('Name',title_str, 'NumberTitle','off');
 plotFeed(subplot(n_rows, 1, 1), t_events, u_segments);
 
 for i = 1:p.nOutputs
-    mask = (out_idx == i);
+    mask = out_idx == i;
     if ~any(mask); continue; end
 
     subplot(n_rows, 1, i + 1);
     hold on; box on; grid on;
 
     plot(t_meas_long(mask), y_meas_long(mask), 'ko', ...
-         'MarkerSize',4, 'DisplayName','Measured');
-    plot(t_meas_long(mask), y_sim_long1(mask), 'b-', ...
-         'LineWidth',1.5, 'DisplayName','PI #1 (full set)');
-    plot(t_meas_long(mask), y_sim_long2(mask), 'r--', ...
-         'LineWidth',1.5, 'DisplayName','PI #2 (PSS subset)');
+         'MarkerSize',4, 'MarkerFaceColor','k');
 
     ylabel([p.outputNames{i}, ' [', p.outputUnits{i}, ']']);
     xlim([t_events(1), t_events(end)]);
-    if i == 1
-        legend('Location','best');
-    end
 end
 
 xlabel('Time [d]');
-sgtitle(titleStr, 'Interpreter','none');
+sgtitle(title_str, 'Interpreter','none');
 
 end % fun

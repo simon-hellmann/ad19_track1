@@ -42,6 +42,9 @@ addpath('utils');
 % random seed for reproducibility (only matters if using stochastic optimiser)
 rng(42);
 
+% --- Workflow flags -------------------------------------------------------
+flag_skip_lhs = true;  % true → skip LHS pre-search, start PI #1 from theta0
+
 %% -----------------------------------------------------------------------
 %  2. MODEL DEFINITION & NOMINAL PARAMETERS
 % -----------------------------------------------------------------------
@@ -65,10 +68,10 @@ parameters_r3 = parameters.ADM1_R3;
 % Loose tolerances inside fmincon (~3-5x faster, negligible effect on optimum).
 % NonNegative prevents ode15s driving biological concentration states below zero.
 non_negative_state_idx = 1:14;
-odeOptsOpt  = odeset('RelTol', 1e-4, 'AbsTol', 1e-6, 'MaxStep', 0.5, ...
+odeOptsOpt  = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
                      'NonNegative', non_negative_state_idx);
 % Tight tolerances for post-processing (FD sensitivity, CV, plots):
-odeOptsPost = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'MaxStep', 0.5, ...
+odeOptsPost = odeset('RelTol', 1e-9, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
                      'NonNegative', non_negative_state_idx);
 
 % --- Output measurement noise standard deviations -----------------------
@@ -132,8 +135,8 @@ y_meas_long = rows(:,3);
 % Each residual r_j is divided by sigma_k * sqrt(n_samples_k), where k = 
 % out_idx(j) and n_samples_k is the total number of samples for output k 
 % across the dataset.
-nSamples   = cellfun(@numel, tMeas);                        % (n_out x 1)
-scale_long = sigmaY(out_idx)' .* sqrt(nSamples(out_idx));   % (N_long x 1)
+nSamples   = cellfun(@numel, tMeas(:));                          % (n_out x 1) always column
+scale_long = sigmaY(out_idx(:))' .* sqrt(nSamples(out_idx(:)));  % (N_long x 1)
 
 % --- Feeding event grid for autovalidation ------------------------------
 t_events   = unique([t0; t_feed_start(:); t_feed_end(:); tf]);
@@ -164,8 +167,8 @@ y_meas_long_CV   = rowsCV(:,3);
 % n_samples_k is taken from the CV dataset, not the autovalidation dataset, so 
 % the normalisation reflects the actual CV sample density per output.
 
-nSamplesCV    = cellfun(@numel, tMeasCV);                            % (n_out x 1)
-scale_long_CV = sigmaY(out_idx_CV)' .* sqrt(nSamplesCV(out_idx_CV)); % (N_long_CV x 1)
+nSamplesCV    = cellfun(@numel, tMeasCV(:));                               % (n_out x 1) always column
+scale_long_CV = sigmaY(out_idx_CV(:))' .* sqrt(nSamplesCV(out_idx_CV(:)));   % (N_long_CV x 1)
 
 % --- Feeding event grid for cross-validation ----------------------------
 t_events_CV  = unique([t0_CV; t_feed_start_CV(:); t_feed_end_CV(:); tf_CV]);
@@ -177,6 +180,9 @@ for event_k = 1:numel(t_feed_start_CV)
     u_segments_CV(active)   = u_feed_value_CV(event_k);
     xi_segments_CV(active,:) = repmat(data_cross.xi_feed(event_k,:), sum(active), 1);
 end
+
+plotMeasurements(t_meas_long,    y_meas_long,    out_idx,    p, t_events,    u_segments,    'Measurement data -- autovalidation');
+plotMeasurements(t_meas_long_CV, y_meas_long_CV, out_idx_CV, p, t_events_CV, u_segments_CV, 'Measurement data -- cross-validation');
 
 %% -----------------------------------------------------------------------
 %  4. STATE INITIALISATION FOR PI #1
@@ -208,7 +214,7 @@ x0_init = [0.049; % S_ac
             0.358; % S_ch4_gas
             0.660];% S_co2_gas
 t_ss     = 500;     % [d] pre-simulation duration for steady-state
-x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsPost);
+x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt);
 
 %% -----------------------------------------------------------------------
 %  4b. LATIN HYPERCUBE SAMPLING -- GLOBAL PRE-SEARCH FOR PI #1
@@ -222,47 +228,71 @@ x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsPost);
 %    - Parameters 1-7 and 9 (strictly positive bounds): log10-scale.
 %    - Parameter 8 (Delta_S_ion, LB = -1e-2 < 0): linear scale.
 
-N_LHS     = 50;
-n_theta   = numel(theta0);
-J_penalty = 1e10;   % also used in section 5
-
-log_idx = setdiff(1:n_theta, 8);   % all parameters except Delta_S_ion
-lin_idx = 8;                       % Delta_S_ion: bounds straddle zero -> linear
-
-% LHS design in [0,1]^n_theta
-lhs_unit = lhsdesign(N_LHS, n_theta);   % (N_LHS x n_theta)
-
-% Map unit hypercube to physical parameter space
-theta_lhs = nan(N_LHS, n_theta);
-for k = log_idx
-    lo = log10(thetaLB(k));
-    hi = log10(thetaUB(k));
-    theta_lhs(:, k) = 10.^(lo + lhs_unit(:, k) .* (hi - lo));
-end
-theta_lhs(:, lin_idx) = thetaLB(lin_idx) + ...
-    lhs_unit(:, lin_idx) .* (thetaUB(lin_idx) - thetaLB(lin_idx));
-
-% Evaluate cost at each LHS sample (optimization-grade ODE tolerances)
-fprintf('Evaluating cost at %d LHS samples (parfor)...\n', N_LHS);
-J_lhs = nan(N_LHS, 1);
+N_LHS       = 50;
+n_theta     = numel(theta0);
+J_penalty   = 1e10;
 maxNumCores = feature('numCores');
-if isempty(gcp('nocreate'))
-    parpool(maxNumCores, 'IdleTimeout', Inf); % pool that never loses connection
-end
-tic_lhs = tic;
-parfor i_lhs = 1:N_LHS
-    J_lhs(i_lhs) = costWLS(theta_lhs(i_lhs, :)', y_meas_long, t_meas_long, ...
-        out_idx, scale_long, t_events, u_segments, xi_segments, x0, ...
-        odeFunc, measFunc, odeOptsOpt, J_penalty);
-end
-computing_time_lhs = toc(tic_lhs); % [s]
-fprintf('LHS done.  Cost range: [%.4g, %.4g]  (%.1f s)\n', min(J_lhs), max(J_lhs), computing_time_lhs);
-delete(gcp('nocreate'));
 
-% Best LHS candidate becomes the starting point for PI #1
-[J0, lhs_best_idx] = min(J_lhs);
-theta_lhs_best    = theta_lhs(lhs_best_idx, :)';
-fprintf('Best LHS candidate: sample #%d,  J = %.4g\n', lhs_best_idx, min(J_lhs));
+if flag_skip_lhs
+    theta_lhs_best = theta0;
+    disp("LHS skipped — starting PI #1 from theta0.")
+else
+    log_idx = setdiff(1:n_theta, 8);   % all parameters except Delta_S_ion
+    lin_idx = 8;                       % Delta_S_ion: bounds straddle zero -> linear
+
+    % LHS design in [0,1]^n_theta
+    lhs_unit  = lhsdesign(N_LHS, n_theta);   % (N_LHS x n_theta)
+
+    % Map unit hypercube to physical parameter space
+    theta_lhs = nan(N_LHS, n_theta);
+    for k = log_idx
+        lo = log10(thetaLB(k));
+        hi = log10(thetaUB(k));
+        theta_lhs(:, k) = 10.^(lo + lhs_unit(:, k) .* (hi - lo));
+    end
+    theta_lhs(:, lin_idx) = thetaLB(lin_idx) + ...
+        lhs_unit(:, lin_idx) .* (thetaUB(lin_idx) - thetaLB(lin_idx));
+
+    % Evaluate cost at each LHS sample (optimization-grade ODE tolerances)
+    fprintf("Evaluating cost at %d LHS samples (parfor)...\n", N_LHS);
+    J_lhs = nan(N_LHS, 1);
+    if isempty(gcp('nocreate'))
+        parpool(maxNumCores, 'IdleTimeout',Inf); % pool that never loses connection
+    end
+    tic_lhs = tic;
+    parfor i_lhs = 1:N_LHS
+        J_lhs(i_lhs) = costWLS(theta_lhs(i_lhs, :)', y_meas_long, t_meas_long, ...
+            out_idx, scale_long, t_events, u_segments, xi_segments, x0, ...
+            odeFunc, measFunc, odeOptsOpt, J_penalty);
+    end
+    computing_time_lhs = toc(tic_lhs); % [s]
+    fprintf("LHS done.  Cost range: [%.4g, %.4g]  (%.1f s)\n", min(J_lhs), max(J_lhs), computing_time_lhs);
+    delete(gcp('nocreate'));
+
+    % Best LHS candidate becomes the starting point for PI #1
+    [~, lhs_best_idx] = min(J_lhs);
+    theta_lhs_best    = theta_lhs(lhs_best_idx, :)';
+    fprintf("Best LHS candidate: sample #%d,  J = %.4g\n", lhs_best_idx, min(J_lhs));
+end % if flag_skip_lhs
+
+%% -----------------------------------------------------------------------
+% sanity-checks of initial param
+% -----------------------------------------------------------------------
+
+% Evaluate cost at theta0 once (with optimization tolerances) to normalize J.
+% Dividing by J0 brings the cost to O(1) at the start, which keeps the
+% gradient components in a numerically tractable range for fmincon's FD.
+% The optimum location is unchanged; only the gradient magnitude is rescaled.
+[J0, J_ch0, r_scaled_cell0, y_sim0] = costWLS(theta0, y_meas_long, ...
+        t_meas_long, out_idx, scale_long, t_events, u_segments, ...
+        xi_segments, x0, odeFunc, measFunc, odeOptsOpt, J_penalty);
+fprintf('J(theta0) = %.4g  (normalization factor)\n', J0);
+
+plotCostChannels(J_ch0, p, 'Cost channels at init param theta0')
+plotResidualBoxplot(r_scaled_cell0, p, 'Scaled residual at init param theta0')
+plotFit(t_meas_long, y_meas_long, y_sim0, out_idx, p, t_events, u_segments, 'Fit at init param theta0')
+
+
 
 %% -----------------------------------------------------------------------
 %  5. PI #1 -- MAX LIKELIHOOD ESTIMATION ON FULL PARAMETER VECTOR (fmincon)
@@ -273,28 +303,22 @@ fprintf('Best LHS candidate: sample #%d,  J = %.4g\n', lhs_best_idx, min(J_lhs))
 % See utils/simulateLong.m -- piecewise ODE integration then long-vector assembly.
 % See utils/costWLS.m      -- thin wrapper: residuals + J = r'*r.
 
-% Evaluate cost at theta0 once (with optimization tolerances) to normalize J.
-% Dividing by J0 brings the cost to O(1) at the start, which keeps the
-% gradient components in a numerically tractable range for fmincon's FD.
-% The optimum location is unchanged; only the gradient magnitude is rescaled.
-J0 = costWLS(theta0, y_meas_long, t_meas_long, out_idx, ...
-             scale_long, t_events, u_segments, xi_segments, x0, ...
-             odeFunc, measFunc, odeOptsOpt, J_penalty);
-fprintf('J(theta0) = %.4g  (normalization factor)\n', J0);
-
 objFun1 = @(theta) costWLS(theta, y_meas_long, t_meas_long, out_idx, ...
               scale_long, t_events, u_segments, xi_segments, x0, ...
-              odeFunc, measFunc, odeOptsOpt, J_penalty) / J0;
+              odeFunc, measFunc, odeOptsOpt, J_penalty);
 
 % --- fmincon options ----------------------------------------------------
-fd_stepSize = odeOptsOpt.RelTol^(1/3); % FD step size ≈ 0.046 for RelTol=1e-4
+% fd_stepSize = odeOptsOpt.RelTol^(1/3); % FD step size ≈ 0.046 for RelTol=1e-4
 opts1 = optimoptions('fmincon', ...
     'Display',                  'iter-detailed', ...
     'Algorithm',                'interior-point', ...
+    'UseParallel',              true, ... % to estimate gradients in parallel
+    'ScaleProblem',             true, ... % to scale obj. fun and gradients
     'MaxFunctionEvaluations',   500, ...
-    'TypicalX',                 theta0, ...
-    'FiniteDifferenceStepSize', fd_stepSize, ... 
-    'FiniteDifferenceType',     'central');
+    'FiniteDifferenceType',     'central', ...
+    'StepTolerance',            1e-6, ... % must be looser than ODE RelTol, else solver sees numerical noise
+    'OptimalityTolerance',      1e-5, ... % can be looser than step tolerance, ...% 'FiniteDifferenceStepSize', fd_stepSize, ... 
+    'TypicalX',                 theta0);
 
 % --- Run PI #1 (starting from best LHS candidate) -----------------------
 disp("Running PI1 with fmincon...")
@@ -316,7 +340,7 @@ computing_time_pi1 = toc(tic_pi1); % [s]
                          u_segments, xi_segments, x0, odeFunc, measFunc, odeOptsPost);
 r_scaled1   = (ySimLong1 - y_meas_long) ./ scale_long; % scaled residuals
 RMSE1_auto = sqrt(mean(r_scaled1.^2));
-plotFit(t_meas_long, y_meas_long, ySimLong1, out_idx, p, 'PI #1 --autovalidation fit');
+plotFit(t_meas_long, y_meas_long, ySimLong1, out_idx, p, t_events, u_segments, 'PI #1 --autovalidation fit');
 
 % ---- 5b. Scaled output sensitivity matrix via central finite differences -
 %
@@ -388,7 +412,7 @@ ySimLong1_CV = simulateLong(thetaHat1, t_meas_long_CV, out_idx_CV, ...
 r_scaled1_CV = (ySimLong1_CV - y_meas_long_CV) ./ scale_long_CV;
 RMSE1_cv     = sqrt(mean(r_scaled1_CV.^2));
 plotFit(t_meas_long_CV, y_meas_long_CV, ySimLong1_CV, out_idx_CV, p, ...
-        'PI #1 --cross-validation');
+    t_events_CV, u_segments_CV, 'PI #1 --cross-validation');
 
 %% -----------------------------------------------------------------------
 %  7. PARAMETER SUBSET SELECTION (PSS)
@@ -477,7 +501,7 @@ thetaHat2(keep_idx) = thetaSub2;
                            u_segments, xi_segments, x0_2, odeFunc, measFunc, odeOptsPost);
 r_scaled2   = (ySimLong2 - y_meas_long) ./ scale_long;
 RMSE2_auto = sqrt(mean(r_scaled2.^2));
-plotFit(t_meas_long, y_meas_long, ySimLong2, out_idx, p, 'PI #2 --autovalidation fit');
+plotFit(t_meas_long, y_meas_long, ySimLong2, out_idx, p, t_events, u_segments, 'PI #2 --autovalidation fit');
 
 % ---- 10b. Scaled output sensitivity matrix for the identifiable subset --
 % Same FD procedure as 5b, but columns restricted to keep_idx.
@@ -531,7 +555,7 @@ ySimLong2_CV = simulateLong(thetaHat2, t_meas_long_CV, out_idx_CV, ...
 r_scaled2_CV = (ySimLong2_CV - y_meas_long_CV) ./ scale_long_CV;
 RMSE2_cv     = sqrt(mean(r_scaled2_CV.^2));
 plotFit(t_meas_long_CV, y_meas_long_CV, ySimLong2_CV, out_idx_CV, p, ...
-        'PI #2 --cross-validation');
+    t_events_CV, u_segments_CV, 'PI #2 --cross-validation');
 
 %% -----------------------------------------------------------------------
 %  11. COMPARISON: BEFORE vs. AFTER PSS
@@ -540,9 +564,9 @@ plotFit(t_meas_long_CV, y_meas_long_CV, ySimLong2_CV, out_idx_CV, p, ...
 % ---- 11a. Fit overlay (autovalidation + CV) -----------------------------------
 % Show that ySimLong1 ~= ySimLong2 (fit quality preserved after PSS)
 plotFitComparison(t_meas_long, y_meas_long, ySimLong1, ySimLong2, out_idx, p, ...
-    'Fit comparison: PI #1 vs PI #2 (autovalidation)');
+    t_events, u_segments, 'Fit comparison: PI #1 vs PI #2 (autovalidation)');
 plotFitComparison(t_meas_long_CV, y_meas_long_CV, ySimLong1_CV, ySimLong2_CV, ...
-    out_idx_CV, p, 'Fit comparison: PI #1 vs PI #2 (cross-validation)');
+    out_idx_CV, p, t_events_CV, u_segments_CV, 'Fit comparison: PI #1 vs PI #2 (cross-validation)');
 
 % ---- 11b. Confidence interval shrinkage ---------------------------------
 % Compare stdTheta1 (all params, PI #1) vs stdTheta2_sub (subset, PI #2)
