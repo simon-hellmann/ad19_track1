@@ -1,0 +1,293 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2869
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww13440\viewh10200\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs28 \cf0 flag_omit_co2 = true: p_CO2 removed. 100403 auto-val samples, 87818 CV samples remain.\
+Evaluating cost at 50 LHS samples (parfor)...\
+Starting parallel pool (parpool) using the 'Processes' profile ...\
+Connected to parallel pool with 8 workers.\
+Warning: Failure at t=4.315370e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=7.315368e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.131606e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=7.315384e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.031607e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.242440e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.531534e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.831536e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=2.042716e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=7.316160e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.342552e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.431535e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=2.042818e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=6.431306e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.431833e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=3.316068e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (7.105427e-15) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=7.315318e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=3.314659e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (7.105427e-15) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.031743e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=2.316624e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (7.105427e-15) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=2.314687e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (7.105427e-15) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=6.431338e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.242438e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=5.446581e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.242436e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=5.447029e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.431533e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.631754e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.731566e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.831533e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=2.231671e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=2.132020e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=2.432308e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (5.684342e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=4.315826e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=7.315941e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=8.315360e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=9.315335e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+Warning: Failure at t=1.315872e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (3.552714e-15) at time t.\
+> In ode15s (line 625)\
+In simulateLong (line 32)\
+In costWLS (line 41)\
+LHS done.  Cost range: [1105, 6.869e+05]  (95.0 s)\
+Parallel pool using the 'Processes' profile is shutting down.\
+Best LHS candidate: sample #41,  J = 1105\
+J(theta0) = 1105  (normalization factor)\
+359 fd_stepSize = odeOptsOpt.RelTol^(1/3);  % \uc0\u8776  2.2e-3 for RelTol=1e-8\
+>> figure; bar(J_lhs)\
+>> odeOptsPost.RelTol^(1/3)\
+\
+ans =\
+\
+   1.0000e-03\
+\
+Running PI1 with fmincon...\
+Starting parallel pool (parpool) using the 'Processes' profile ...\
+Connected to parallel pool with 8 workers.\
+>> [ySimLong1, x0_CV] = simulateLong(thetaHat1, t_meas_long, out_idx, t_events, ...\
+                         u_segments, xi_segments, x0, odeFunc, measFunc, odeOptsPost);\
+r_scaled1   = (ySimLong1 - y_meas_long) ./ scale_long; % scaled residuals\
+RMSE1_auto = sqrt(mean(r_scaled1.^2));\
+plotFit(t_meas_long, y_meas_long, ySimLong1, out_idx, p, t_events, u_segments, 'PI #1 --autovalidation fit');\
+\
+[J1, J_ch1, r_scaled_cell1] = costWLS(thetaHat1, y_meas_long, ...\
+        t_meas_long, out_idx, scale_long, t_events, u_segments, ...\
+        xi_segments, x0, odeFunc, measFunc, odeOptsOpt, J_penalty);\
+plotCostChannels(J_ch1, p, 'Cost channels PI #1')\
+plotResidualBoxplot(r_scaled_cell1, p, 'Scaled residual PI #1')\
+\
+                                            First-order      Norm of\
+ Iter F-count            f(x)  Feasibility   optimality         step\
+    0      19    1.000000e+00    0.000e+00    3.066e+00\
+    1      40    8.723153e-01    0.000e+00    2.298e+01    1.337e-01\
+    2      59    1.130804e+00    0.000e+00    4.960e+00    9.280e-01\
+    3      78    1.063641e+00    0.000e+00    2.006e+00    1.632e-01\
+    4      97    7.939157e-01    0.000e+00    2.385e-01    6.463e-01\
+    5     116    7.250924e-01    0.000e+00    4.363e+00    2.077e-01\
+    6     135    6.496525e-01    0.000e+00    1.179e+01    2.212e-01\
+    7     154    6.957934e-01    0.000e+00    3.380e+00    2.343e-01\
+    8     175    6.749100e-01    0.000e+00    8.970e+00    8.119e-02\
+    9     196    6.080035e-01    0.000e+00    5.000e+00    7.360e-02\
+   10     215    6.200962e-01    0.000e+00    9.373e-01    9.168e-02\
+   11     234    6.037464e-01    0.000e+00    1.476e-01    3.478e-02\
+   12     253    5.030216e-01    0.000e+00    2.287e-01    1.359e-01\
+   13     272    4.845825e-01    0.000e+00    3.107e-01    8.289e-02\
+   14     291    4.778539e-01    0.000e+00    1.492e-01    1.192e-01\
+   15     310    4.665661e-01    0.000e+00    1.936e-01    1.920e-01\
+   16     329    4.673701e-01    0.000e+00    7.899e-02    2.249e-02\
+   17     348    4.659718e-01    0.000e+00    1.558e-01    4.168e-02\
+   18     367    4.659073e-01    0.000e+00    1.078e-01    1.834e-02\
+   19     386    4.648129e-01    0.000e+00    3.066e-01    6.715e-02\
+   20     405    4.655490e-01    0.000e+00    2.054e-01    1.048e-02\
+   21     424    4.656248e-01    0.000e+00    5.479e-02    3.227e-02\
+   22     443    4.659776e-01    0.000e+00    6.209e-02    1.776e-02\
+   23     462    4.432274e-01    0.000e+00    2.077e+00    3.587e-01\
+   24     483    4.382724e-01    0.000e+00    1.196e+00    3.602e-01\
+   25     502    4.318021e-01    0.000e+00    6.242e-01    1.335e-01\
+   26     521    4.294531e-01    0.000e+00    2.061e-01    2.670e-01\
+   27     540    4.292849e-01    0.000e+00    1.226e-01    6.480e-02\
+   28     559    4.279136e-01    0.000e+00    1.178e-01    1.989e-01\
+   29     578    4.285280e-01    0.000e+00    3.089e-02    1.978e-02\
+   30     597    4.284917e-01    0.000e+00    1.917e-02    3.974e-02\
+\
+                                            First-order      Norm of\
+ Iter F-count            f(x)  Feasibility   optimality         step\
+   31     616    4.288451e-01    0.000e+00    3.862e-02    5.188e-02\
+   32     635    4.288757e-01    0.000e+00    8.120e-02    2.844e-02\
+   33     654    4.287364e-01    0.000e+00    7.775e-02    3.187e-02\
+   34     673    4.278797e-01    0.000e+00    1.452e-01    2.100e-01\
+   35     692    4.281378e-01    0.000e+00    9.910e-02    6.175e-02\
+   36     711    4.283367e-01    0.000e+00    3.869e-02    2.954e-01\
+   37     730    4.282670e-01    0.000e+00    2.165e-02    1.110e-01\
+   38     749    4.282072e-01    0.000e+00    1.524e-02    1.364e-02\
+   39     770    4.281771e-01    0.000e+00    2.663e-02    3.758e-02\
+   40     792    4.281754e-01    0.000e+00    1.353e-02    1.788e-03\
+   41     812    4.281616e-01    0.000e+00    2.163e-02    8.946e-03\
+   42     834    4.281508e-01    0.000e+00    1.692e-02    1.106e-02\
+   43     855    4.281488e-01    0.000e+00    1.719e-02    1.130e-02\
+   44     876    4.281473e-01    0.000e+00    1.335e-02    1.215e-03\
+   45     896    4.281628e-01    0.000e+00    6.009e-03    4.736e-03\
+   46     915    4.218117e-01    0.000e+00    1.210e-01    2.061e-01\
+   47     934    4.208493e-01    0.000e+00    2.412e-01    6.176e-02\
+   48     953    4.204900e-01    0.000e+00    8.545e-02    7.770e-02\
+   49     972    4.201633e-01    0.000e+00    5.201e-01    5.700e-02\
+   50     991    4.193820e-01    0.000e+00    5.554e-01    1.249e-01\
+   51    1010    4.184985e-01    0.000e+00    5.745e-02    1.580e-01\
+   52    1029    4.181117e-01    0.000e+00    2.111e-01    1.639e-01\
+   53    1048    4.179420e-01    0.000e+00    3.044e-01    1.339e-01\
+   54    1067    4.175177e-01    0.000e+00    3.284e-01    3.315e-01\
+   55    1086    4.176732e-01    0.000e+00    1.403e-01    3.359e-02\
+   56    1105    4.176145e-01    0.000e+00    3.487e-02    8.606e-02\
+   57    1124    4.175488e-01    0.000e+00    6.864e-03    2.705e-02\
+   58    1143    4.174784e-01    0.000e+00    1.745e-02    6.216e-02\
+   59    1163    4.174950e-01    0.000e+00    9.666e-03    9.475e-03\
+   60    1184    4.174562e-01    0.000e+00    2.141e-02    2.089e-02\
+\
+                                            First-order      Norm of\
+ Iter F-count            f(x)  Feasibility   optimality         step\
+   61    1203    4.174587e-01    0.000e+00    2.874e-02    3.110e-02\
+   62    1224    4.174866e-01    0.000e+00    4.502e-02    4.361e-02\
+   63    1244    4.175048e-01    0.000e+00    4.235e-02    3.131e-02\
+   64    1263    4.174846e-01    0.000e+00    2.080e-02    2.822e-02\
+   65    1282    4.174563e-01    0.000e+00    1.018e-02    2.247e-02\
+   66    1301    4.174495e-01    0.000e+00    1.858e-02    2.812e-02\
+   67    1323    4.174469e-01    0.000e+00    2.226e-02    1.371e-02\
+   68    1345    4.174467e-01    0.000e+00    1.748e-02    4.923e-03\
+   69    1366    4.174457e-01    0.000e+00    1.461e-02    1.026e-03\
+   70    1402    4.174456e-01    0.000e+00    4.525e-03    8.081e-08\
+\
+Optimization stopped because the relative changes in all elements of x are\
+less than options.StepTolerance = 1.000000e-07, and the relative maximum constraint\
+violation, 0.000000e+00, is less than options.ConstraintTolerance = 1.000000e-06.\
+\
+>> output1\
+\
+output1 = \
+\
+  struct with fields:\
+\
+         iterations: 70\
+          funcCount: 1402\
+    constrviolation: 0\
+           stepsize: 8.0806e-08\
+          algorithm: 'interior-point'\
+      firstorderopt: 0.0045\
+       cgiterations: 26\
+            message: 'Local minimum possible. Constraints satisfied.\uc0\u8629 \u8629 fmincon stopped because the size of the current step is less than\u8629 the value of the step size tolerance and constraints are \u8629 satisfied to within the value of the constraint tolerance.\u8629 \u8629 <stopping criteria details>\u8629 \u8629 Optimization stopped because the relative changes in all elements of x are\u8629 less than options.StepTolerance = 1.000000e-07, and the relative maximum constraint\u8629 violation, 0.000000e+00, is less than options.ConstraintTolerance = 1.000000e-06.'\
+       bestfeasible: [1\'d71 struct]\
+\
+IdleTimeout has been reached.\
+Parallel pool using the 'Processes' profile is shutting down.\
+>> }
