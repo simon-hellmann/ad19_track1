@@ -27,8 +27,10 @@ for i = 1:p.nOutputs
     grp   = [grp;   i * ones(n_i, 1)];
 end
 
+active_chs = unique(grp);   % channels actually present (handles omitted outputs)
+
 figure('Name',title_str, 'NumberTitle','off');
-boxplot(all_r, grp, 'Labels',p.outputNames);
+boxplot(all_r, grp, 'Labels', p.outputNames(active_chs));
 set(findobj(gca, 'type','text'), 'Interpreter','latex');
 yline(0, 'k--');
 ylabel('Scaled residual $\tilde{r}_k$ [-]', 'Interpreter','latex');
