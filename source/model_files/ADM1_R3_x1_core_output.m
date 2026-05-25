@@ -1,8 +1,8 @@
 %% ADM1_R3_x1_core_output.m
-% Output equation for ADM1-R3-x1. Same six outputs as ADM1-R3-Core;
-% k_p (now th(12)) enters the q_gas expression.
+% Output equation for ADM1-R3-x1. Identical to ADM1-R3-Core; K_S_IN does
+% not appear in the output equations so no changes are required.
 %
-% Author: Simon Hellmann. Created: 2026/05/24. Version: Matlab R2022b, Update 6
+% Author: Simon Hellmann. Created: 2026/05/25. Version: Matlab R2022b, Update 6
 %
 %% Output
 %
@@ -17,8 +17,8 @@
 %% Input
 %
 %   x:          (14x1) state vector                              [various]
-%   th:         (12x1) tunable parameter vector (see setup_ADM1_R3_x1)
-%   c:          (19x1) time-invariant parameters (see setup_ADM1_R3_x1)
+%   th:         (10x1) tunable parameter vector (see setup_ADM1_R3_x1)
+%   c:          (31x1) time-invariant parameters (see setup_ADM1_R3_x1)
 %
 
 function g = ADM1_R3_x1_core_output(x, th, c)
@@ -28,16 +28,12 @@ Phi    = th(8) + (x(4) - x(12))/17 - x(11)/44 - x(10)/60;
 % equivalent proton concentration:
 SHPlus = -Phi/2 + 0.5*sqrt(Phi^2 + c(4));
 
-% total biogas pressure including water vapour (c(18) = p_h2o, default 0):
-p_tot = c(11)*x(13) + c(12)*x(14) + c(18);
-
-% measurement equations
-% q_gas = k_p/p_atm * p_tot * (p_tot - p_atm) = th(12)*c(17)*p_tot^2 - th(12)*p_tot
-g = [th(12)*c(17)*p_tot^2 - th(12)*p_tot;  % q_gas [m^3/d]
-     c(11)*x(13);                            % p_CH4 [bar]
-     c(12)*x(14);                            % p_CO2 [bar]
-     -log10(SHPlus);                         % pH    [-]
-     x(4);                                   % S_IN  [g/L]
-     x(1)];                                  % S_ac  [g/L]
+% measurement equations (c indices unchanged from ADM1-R3-Core)
+g = [c(13)*x(13)^2 + c(14)*x(13)*x(14) + c(15)*x(14)^2 + c(16)*x(13) + c(17)*x(14) + c(18); % q_gas
+     c(19)*x(13);     % p_CH4
+     c(20)*x(14);     % p_CO2
+     -log10(SHPlus);  % pH
+     x(4);            % S_IN
+     x(1)];           % S_ac
 
 end % fun
