@@ -43,7 +43,10 @@ addpath('utils');
 rng(42);
 
 % --- Workflow flags -------------------------------------------------------
-flag_skip_lhs = true;  % true → skip LHS pre-search, start PI #1 from theta0
+model_name      = "ADM1-R3-x1";  % model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM1-R3-x2"
+flag_skip_lhs   = false;         % true → skip LHS pre-search, start PI #1 from theta0
+flag_omit_co2   = true;          % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 suffice
+delta_feed_min  = 10;            % assumed feeding duration [min] — sets bolus flow amplitude
 
 %% -----------------------------------------------------------------------
 %  2. MODEL DEFINITION & NOMINAL PARAMETERS
@@ -58,28 +61,65 @@ addpath('model_files/model_data');
 load('ADM1_parameters.mat', 'parameters');
 parameters_r3 = parameters.ADM1_R3;
 
-% --- Assemble model (ADM1-R3) --------------------------------------------
-% Returns c, a, odeFunc, measFunc, theta0, bounds, and metadata struct p.
-% To switch models, replace this call (e.g. setup_ADM1_R3x1).
-[c, a, odeFunc, measFunc, theta0, thetaLB, thetaUB, p] = ...
-    setup_ADM1_R3(parameters_r3, V_liq, V_gas);
+% --- Assemble model -------------------------------------------------------
+% Switch model_name in section 1. Add a case here for each new variant.
+switch model_name
+    case "ADM1-R3-x1"
+        [c, a, odeFunc, measFunc, theta0, thetaLB, thetaUB, p] = ...
+            setup_ADM1_R3_x1(parameters_r3, V_liq, V_gas);
+    case "ADM1-R3-x2"
+        [c, a, odeFunc, measFunc, theta0, thetaLB, thetaUB, p] = ...
+            setup_ADM1_R3_x2(parameters_r3, V_liq, V_gas);
+    case "ADM1-R3"
+        [c, a, odeFunc, measFunc, theta0, thetaLB, thetaUB, p] = ...
+            setup_ADM1_R3(parameters_r3, V_liq, V_gas);
+    otherwise
+        error("Unknown model_name '%s'. Add a case for new variants here.", model_name);
+end % switch
+
+% --- Log10 reparametrisation indices and phi-space bounds ----------------
+% Strictly positive parameters are optimised in log10-space (phi_k = log10(theta_k)).
+% This normalises all phi ~ O(1), improves L-BFGS Hessian conditioning, and
+% makes the FD step a uniform ~1 % relative perturbation on theta regardless
+% of parameter magnitude.  Delta_S_ion (param 8) has LB < 0, so it stays linear.
+n_theta = numel(theta0);
+log_idx = setdiff(1:n_theta, 8);   % strictly positive bounds → log10-scale
+lin_idx = 8;                       % Delta_S_ion: LB < 0 → linear scale
+
+phiLB = thetaLB;  phiLB(log_idx) = log10(thetaLB(log_idx));   % bounds in phi-space
+phiUB = thetaUB;  phiUB(log_idx) = log10(thetaUB(log_idx));
 
 % --- ODE solver options --------------------------------------------------
-% Loose tolerances inside fmincon (~3-5x faster, negligible effect on optimum).
-% NonNegative prevents ode15s driving biological concentration states below zero.
+% Relaxed tolerances inside fmincon (10x looser than post-processing) to speed
+% up cost evaluations. NonNegative prevents ode15s driving biological
+% concentration states below zero.
 non_negative_state_idx = 1:14;
-odeOptsOpt  = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
+odeOptsOpt  = odeset('RelTol', 1e-7, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
                      'NonNegative', non_negative_state_idx);
 % Tight tolerances for post-processing (FD sensitivity, CV, plots):
-odeOptsPost = odeset('RelTol', 1e-9, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
+odeOptsPost = odeset('RelTol', 1e-8, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
                      'NonNegative', non_negative_state_idx);
 
 % --- Output measurement noise standard deviations -----------------------
 % Units: [m^3/d, bar, bar, -, g/L, g/L]
 sigmaY = [4e-4, 1.78e-2, 2.68e-2, 2e-2, 0.12, 5e-2];
 
+% --- Gas measurement preprocessing options -------------------------------
+% Gas production (ch 1) is disturbed by feeding and by IN/AC grab sampling.
+% Set flags to exclude affected windows; adjust dt values for asymmetric masks.
+prepOpts.flag_filter_feed   = true;
+prepOpts.flag_filter_IN     = true;
+prepOpts.flag_filter_AC     = true;
+prepOpts.dt_feed_before     = 30 / 1440;   % [d]
+prepOpts.dt_feed_after      = 30 / 1440;   % [d]
+prepOpts.dt_IN_before       = 30 / 1440;   % [d]
+prepOpts.dt_IN_after        = 30 / 1440;   % [d]
+prepOpts.dt_AC_before       = 30 / 1440;   % [d]
+prepOpts.dt_AC_after        = 30 / 1440;   % [d]
+prepOpts.q_gas_min          = 3  / 1000;   % [m^3/d] — measurements below this are always excluded
+
 %% -----------------------------------------------------------------------
-%  3. LOAD & PREPARE DATASETS
+%  3. LOAD & PREPROCESS DATASETS
 % -----------------------------------------------------------------------
 
 % Note: Run split_data_pss.m first to generate these files from the raw MESS struct.
@@ -87,6 +127,33 @@ sigmaY = [4e-4, 1.78e-2, 2.68e-2, 2e-2, 0.12, 5e-2];
 load('../data/processed/data_init.mat',  'data_init');
 load('../data/processed/data_auto.mat',  'data_auto');
 load('../data/processed/data_cross.mat', 'data_cross');
+
+% --- Recompute feed event duration and flow rate -------------------------
+% delta_feed_min (set in section 1) controls the assumed bolus duration.
+% A shorter duration raises the instantaneous flow rate for the same total
+% feed mass; a longer one lowers it.  Changing it here avoids re-running
+% split_data_pss.m: feed volumes are recovered from the stored values
+% (feed_volume = u_feed_value * delta_feed_days_stored), then recomputed
+% for the new duration.  Must run before preprocessData because t_feed_end
+% enters the gas-measurement exclusion windows.
+delta_feed_days          = delta_feed_min / (24*60);                              % [d]
+delta_feed_days_stored   = data_auto.t_feed_end(1) - data_auto.t_feed_start(1);  % [d] as saved
+
+feed_vol_init  = data_init.u_feed_value  .* delta_feed_days_stored;  % [m^3]
+feed_vol_auto  = data_auto.u_feed_value  .* delta_feed_days_stored;  % [m^3]
+feed_vol_cross = data_cross.u_feed_value .* delta_feed_days_stored;  % [m^3]
+
+data_init.t_feed_end   = data_init.t_feed_start  + delta_feed_days;
+data_init.u_feed_value = feed_vol_init            / delta_feed_days;  % [m^3/d]
+
+data_auto.t_feed_end   = data_auto.t_feed_start   + delta_feed_days;
+data_auto.u_feed_value = feed_vol_auto             / delta_feed_days;  % [m^3/d]
+
+data_cross.t_feed_end   = data_cross.t_feed_start  + delta_feed_days;
+data_cross.u_feed_value = feed_vol_cross            / delta_feed_days;  % [m^3/d]
+
+data_auto  = preprocessData(data_auto,  prepOpts);
+data_cross = preprocessData(data_cross, prepOpts);
 
 % Unpack training (auto-validation) dataset:
 %   tMeas{i}        -- (n_i x 1) measurement times per output [d]
@@ -181,6 +248,28 @@ for event_k = 1:numel(t_feed_start_CV)
     xi_segments_CV(active,:) = repmat(data_cross.xi_feed(event_k,:), sum(active), 1);
 end
 
+% --- Optionally drop p_CO2 (output 3) from both PI datasets --------------
+% q_gas, p_CH4, p_CO2 are linearly dependent via the gas-phase mole balance,
+% so all three together over-constrain the problem; two suffice.
+idx_co2 = 3;
+if flag_omit_co2
+    keep          = out_idx    ~= idx_co2;
+    t_meas_long   = t_meas_long(keep);
+    out_idx       = out_idx(keep);
+    y_meas_long   = y_meas_long(keep);
+    scale_long    = scale_long(keep);
+
+    keep_CV         = out_idx_CV ~= idx_co2;
+    t_meas_long_CV  = t_meas_long_CV(keep_CV);
+    out_idx_CV      = out_idx_CV(keep_CV);
+    y_meas_long_CV  = y_meas_long_CV(keep_CV);
+    scale_long_CV   = scale_long_CV(keep_CV);
+
+    fprintf("flag_omit_co2 = true: p_CO2 removed. " + ...
+            "%d auto-val samples, %d CV samples remain.\n", ...
+            numel(t_meas_long), numel(t_meas_long_CV));
+end
+
 plotMeasurements(t_meas_long,    y_meas_long,    out_idx,    p, t_events,    u_segments,    'Measurement data -- autovalidation');
 plotMeasurements(t_meas_long_CV, y_meas_long_CV, out_idx_CV, p, t_events_CV, u_segments_CV, 'Measurement data -- cross-validation');
 
@@ -228,18 +317,13 @@ x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt);
 %    - Parameters 1-7 and 9 (strictly positive bounds): log10-scale.
 %    - Parameter 8 (Delta_S_ion, LB = -1e-2 < 0): linear scale.
 
-N_LHS       = 50;
-n_theta     = numel(theta0);
+N_LHS       = 100;
 J_penalty   = 1e10;
 maxNumCores = feature('numCores');
 
 if flag_skip_lhs
-    theta_lhs_best = theta0;
-    disp("LHS skipped — starting PI #1 from theta0.")
+    disp("LHS skipped — will start PI #1 from theta0.")
 else
-    log_idx = setdiff(1:n_theta, 8);   % all parameters except Delta_S_ion
-    lin_idx = 8;                       % Delta_S_ion: bounds straddle zero -> linear
-
     % LHS design in [0,1]^n_theta
     lhs_unit  = lhsdesign(N_LHS, n_theta);   % (N_LHS x n_theta)
 
@@ -270,10 +354,15 @@ else
     delete(gcp('nocreate'));
 
     % Best LHS candidate becomes the starting point for PI #1
-    [~, lhs_best_idx] = min(J_lhs);
+    [J0_lhs, lhs_best_idx] = min(J_lhs);
     theta_lhs_best    = theta_lhs(lhs_best_idx, :)';
-    fprintf("Best LHS candidate: sample #%d,  J = %.4g\n", lhs_best_idx, min(J_lhs));
+    fprintf("Best LHS candidate: sample #%d,  J = %.4g\n", lhs_best_idx, J0_lhs);
+    theta0 = theta_lhs_best;
 end % if flag_skip_lhs
+
+% Starting point for fmincon in phi-space (all phi ~ O(1) after log10 transform)
+phi0          = theta0;
+phi0(log_idx) = log10(theta0(log_idx));
 
 %% -----------------------------------------------------------------------
 % sanity-checks of initial param
@@ -292,8 +381,6 @@ plotCostChannels(J_ch0, p, 'Cost channels at init param theta0')
 plotResidualBoxplot(r_scaled_cell0, p, 'Scaled residual at init param theta0')
 plotFit(t_meas_long, y_meas_long, y_sim0, out_idx, p, t_events, u_segments, 'Fit at init param theta0')
 
-
-
 %% -----------------------------------------------------------------------
 %  5. PI #1 -- MAX LIKELIHOOD ESTIMATION ON FULL PARAMETER VECTOR (fmincon)
 % -----------------------------------------------------------------------
@@ -303,31 +390,38 @@ plotFit(t_meas_long, y_meas_long, y_sim0, out_idx, p, t_events, u_segments, 'Fit
 % See utils/simulateLong.m -- piecewise ODE integration then long-vector assembly.
 % See utils/costWLS.m      -- thin wrapper: residuals + J = r'*r.
 
-objFun1 = @(theta) costWLS(theta, y_meas_long, t_meas_long, out_idx, ...
+objFun1 = @(phi) costWLS(phi2theta(phi, log_idx), y_meas_long, t_meas_long, out_idx, ...
               scale_long, t_events, u_segments, xi_segments, x0, ...
-              odeFunc, measFunc, odeOptsOpt, J_penalty);
+              odeFunc, measFunc, odeOptsOpt, J_penalty) / J0;
 
 % --- fmincon options ----------------------------------------------------
-% fd_stepSize = odeOptsOpt.RelTol^(1/3); % FD step size ≈ 0.046 for RelTol=1e-4
+% FD step in phi-space: h ~ ODE_noise^(1/3) balances truncation error O(h^2)
+% against gradient noise O(ODE_noise/h).  All phi ~ O(1) so a uniform absolute
+% step is appropriate; no per-parameter relative scaling needed.  RelTol=1e-7 → h ≈ 4.6e-3.
+fd_stepSize = odeOptsOpt.RelTol^(1/3);  % ≈ 4.6e-3 for RelTol=1e-7
 opts1 = optimoptions('fmincon', ...
     'Display',                  'iter-detailed', ...
     'Algorithm',                'interior-point', ...
-    'UseParallel',              true, ... % to estimate gradients in parallel
-    'ScaleProblem',             true, ... % to scale obj. fun and gradients
-    'MaxFunctionEvaluations',   500, ...
+    'UseParallel',              true, ...
     'FiniteDifferenceType',     'central', ...
-    'StepTolerance',            1e-6, ... % must be looser than ODE RelTol, else solver sees numerical noise
-    'OptimalityTolerance',      1e-5, ... % can be looser than step tolerance, ...% 'FiniteDifferenceStepSize', fd_stepSize, ... 
-    'TypicalX',                 theta0);
+    'FiniteDifferenceStepSize', fd_stepSize, ...
+    'HessianApproximation',     'lbfgs', ...    % default 10-pair memory; 4 pairs caused cost
+    ...                                     %   to increase in early iterations (Hessian too coarse)
+    'StepTolerance',            1e-10, ...  % near MATLAB default: larger values fire SOONER
+    ...                                     %   (step must shrink BELOW threshold to trigger)
+    'OptimalityTolerance',      1e-3, ...   % ~46x above gradient noise floor (≈2e-5):
+    ...                                     %   only stop when slope is genuinely flat
+    'TypicalX',                 ones(n_theta, 1), ...   % phi ~ O(1) for all params
+    'MaxFunctionEvaluations',   5000, ...
+    'MaxIterations',            2000);
 
 % --- Run PI #1 (starting from best LHS candidate) -----------------------
 disp("Running PI1 with fmincon...")
 tic_pi1 = tic;
-[thetaHat1, fval1_norm, exitflag1, output1] = fmincon(objFun1, theta_lhs_best, ...
-    [], [], [], [], thetaLB, thetaUB, [], opts1);
+[phiHat1, fval1_norm, exitflag1, output1] = fmincon(objFun1, phi0, ...
+    [], [], [], [], phiLB, phiUB, [], opts1);
 computing_time_pi1 = toc(tic_pi1); % [s]
-
-% thetaHat1: estimated parameter vector after PI #1
+thetaHat1 = phi2theta(phiHat1, log_idx);   % convert phi-space result to physical params
 
 %% -----------------------------------------------------------------------
 %  6. POST-PI #1 ANALYSIS
@@ -342,69 +436,75 @@ r_scaled1   = (ySimLong1 - y_meas_long) ./ scale_long; % scaled residuals
 RMSE1_auto = sqrt(mean(r_scaled1.^2));
 plotFit(t_meas_long, y_meas_long, ySimLong1, out_idx, p, t_events, u_segments, 'PI #1 --autovalidation fit');
 
-% ---- 5b. Scaled output sensitivity matrix via central finite differences -
-%
-% Two sensitivity matrices are built from dydth1_raw (see Step 2 below):
-%   dydth1_os(j,k) = (d y_j/d theta_k) / scale_long(j)
-%     Output-scaled only.  FIM = dydth1_os'*dydth1_os gives Fisher information
-%     in physical parameter units (consistent with the WLS cost).
-%   dydth1(j,k) = dydth1_os(j,k) * thetaHat1(k)
-%     Also parameter-scaled (dimensionless).  Used for PSS only.
-%     Must NOT be used for FIM: the thetaHat scaling introduces D_theta on
-%     both sides of the FIM (FIM_scaled = D_theta*FIM_wls*D_theta), giving
-%     std devs in the normalized space rather than physical units.
-%
-% Step 1: compute raw (unscaled) one-at-a-time FD sensitivities
-%   dydth1_raw(j,k) = d y_j / d theta_k   [output units / parameter units]
-%   rows follow the same ordering as y_meas_long (time-sorted, then out_idx)
+[J1, J_ch1, r_scaled_cell1] = costWLS(thetaHat1, y_meas_long, ...
+        t_meas_long, out_idx, scale_long, t_events, u_segments, ...
+        xi_segments, x0, odeFunc, measFunc, odeOptsOpt, J_penalty);
+plotCostChannels(J_ch1, p, 'Cost channels PI #1')
+plotResidualBoxplot(r_scaled_cell1, p, 'Scaled residual PI #1')
 
-h_rel        = odeOptsPost.RelTol^(1/3);   % ≈ 0.01 for RelTol=1e-6; matched to ODE noise floor
-N_long       = numel(t_meas_long);
-dydth1_raw   = nan(N_long, p.nParameters); 
+% ---- 5b. Scaled output sensitivity matrix via central finite differences in phi-space --
+%
+% A uniform absolute step h_phi is used for all parameters.
+% For log-scaled params (log_idx): step h_phi in phi = log10(theta) is equivalent
+% to multiplying theta_k by 10^(±h_phi), i.e. a ~0.5 % relative step on theta
+% regardless of parameter magnitude.
+% For the linear param (lin_idx): the same h_phi is an absolute step on theta_8 directly.
+%
+% dydphi1_os(j,k) = (d y_j / d phi_k) / scale_long(j)   [dimensionless]
+%
+% This single matrix serves both FIM and PSS — no second matrix needed.
+% Relation to the old theta-space matrices for log-scaled columns:
+%   dydth1_ops(:,k)  = (dy/dtheta_k) * thetaHat1(k) / scale_j   [old, param-scaled]
+%   dydphi1_os(:,k)  = dydth1_ops(:,k) * ln(10)                  [phi-space, log_idx]
+%   dydphi1_os(:,k)  = dydth1_os(:,k)                            [phi-space, lin_idx]
+% The factor ln(10) is a uniform column scale that does not change PSS collinearity
+% detection but makes the FIM live in the correct phi-space (log10-unit) coordinates.
 
-disp("Computing FD sensitivities (parfor)...")
+h_phi  = odeOptsPost.RelTol^(1/3);   % ≈ 2.15e-3 for RelTol=1e-8; uniform in phi-space
+N_long = numel(t_meas_long);
+dydphi1_raw = nan(N_long, n_theta);
+
+disp("Computing FD sensitivities in phi-space (parfor)...")
 if isempty(gcp('nocreate'))
     parpool(maxNumCores,'IdleTimeout',Inf); % pool that never loses connection
 end
 
-parfor k = 1:p.nParameters
-    fprintf("Computing FD sensitivities of param %i of %i...\n", k, p.nParameters); 
-    delta_k   = h_rel * abs(thetaHat1(k));
-    if delta_k == 0;  delta_k = h_rel;  end
-
-    theta_fwd = thetaHat1;  theta_fwd(k) = thetaHat1(k) + delta_k;
-    theta_bwd = thetaHat1;  theta_bwd(k) = thetaHat1(k) - delta_k;
+parfor k = 1:n_theta
+    fprintf("Computing FD sensitivities of param %i of %i...\n", k, n_theta);
+    phi_fwd    = phiHat1;  phi_fwd(k)  = phiHat1(k) + h_phi;
+    phi_bwd    = phiHat1;  phi_bwd(k)  = phiHat1(k) - h_phi;
+    theta_fwd  = phi2theta(phi_fwd, log_idx);
+    theta_bwd  = phi2theta(phi_bwd, log_idx);
 
     y_fwd = simulateLong(theta_fwd, t_meas_long, out_idx, t_events, ...
                 u_segments, xi_segments, x0, odeFunc, measFunc, odeOptsPost);
     y_bwd = simulateLong(theta_bwd, t_meas_long, out_idx, t_events, ...
                 u_segments, xi_segments, x0, odeFunc, measFunc, odeOptsPost);
 
-    dydth1_raw(:,k) = (y_fwd - y_bwd) ./ (2*delta_k);
+    dydphi1_raw(:,k) = (y_fwd - y_bwd) ./ (2*h_phi);
 end
-delete(gcp('nocreate')) % Shut down parallel pool
+delete(gcp('nocreate'))
 
-% Step 2: two separate scaled matrices with distinct purposes
-%
-%   dydth1_os  -- output-scaled only (for FIM / Cramer-Rao)
-%     Row j divided by scale_long(j) = sigma_i * sqrt(n_i).
-%     FIM = dydth1_os' * dydth1_os gives the Fisher information in the
-%     original physical parameter units, consistent with the WLS cost.
-%
-%   dydth1_ops -- output- AND parameter-scaled (for PSS only)
-%     Additionally multiply column k by thetaHat1(k) to make all columns
-%     dimensionless and comparable across parameters of different magnitudes.
-%     This matrix must NOT be used for FIM: it introduces D_theta on both
-%     sides of the FIM (FIM_scaled = D_theta * FIM_wls * D_theta), which
-%     would give std devs in normalized space, not physical units.
+dydphi1_os = dydphi1_raw ./ scale_long;   % (N_long x n_theta): output-scaled phi-space sensitivity
 
-dydth1_os = dydth1_raw ./ scale_long;       % (N_long x nP): output-scaled
-dydth1_ops = dydth1_os  .* thetaHat1(:)';   % (N_long x nP): also param-scaled (PSS only)
+FIM1_phi = dydphi1_os' * dydphi1_os;      % Fisher information in phi-space
+C_phi1   = inv(FIM1_phi);
+std_phi1 = sqrt(diag(C_phi1));            % std dev of phiHat1 [log10 units for log-params]
 
-FIM1      = dydth1_os' * dydth1_os;         % Fisher Information Matrix (physical units)
-C_theta1  = inv(FIM1);                      % Cramer-Rao lower bound
-stdTheta1 = sqrt(diag(C_theta1));           % std dev in physical parameter units
-plotUncertainty(thetaHat1, stdTheta1, p, 'PI #1 --parameter uncertainty');
+% ±1-sigma confidence interval bounds in theta-space
+% log-params: multiplicative  theta * 10^(±std_phi)
+% lin-param:  additive        theta ± std_phi
+theta1_lo              = thetaHat1;
+theta1_hi              = thetaHat1;
+theta1_lo(log_idx)     = thetaHat1(log_idx) .* 10.^(-std_phi1(log_idx));
+theta1_hi(log_idx)     = thetaHat1(log_idx) .* 10.^(+std_phi1(log_idx));
+theta1_lo(lin_idx)     = thetaHat1(lin_idx) - std_phi1(lin_idx);
+theta1_hi(lin_idx)     = thetaHat1(lin_idx) + std_phi1(lin_idx);
+
+% delta-method std in theta-space for plotting (first-order approx, valid when std_phi < 0.5)
+std_theta1             = thetaHat1 .* log(10) .* std_phi1;
+std_theta1(lin_idx)    = std_phi1(lin_idx);
+plotUncertainty(thetaHat1, std_theta1, p, 'PI #1 --parameter uncertainty');
 
 % ---- 5c. Cross-validation with independent dataset ---------------------
 ySimLong1_CV = simulateLong(thetaHat1, t_meas_long_CV, out_idx_CV, ...
@@ -423,13 +523,17 @@ plotFit(t_meas_long_CV, y_meas_long_CV, ySimLong1_CV, out_idx_CV, p, ...
 % parameter subset (see subsetSelection.m -- Lopez et al., 2015).
 
 % --- PSS thresholds ------------------------------
-kappa_max = 500; % maximum condition number
+kappa_max = 250; % maximum condition number
 gamma_max = 15;   % maximum collinearity index
 
 % --- Run PSS ------------------------------------------------------------
-% dydth1 is doubly-scaled (rows / scale_long, cols * thetaHat1).
-% C_pp returned is in physical parameter units (re-transformed inside).
-[si, keep_idx, C_pp, pi_decomp, epsilon, kappa, gamma] = param_subset_selection(dydth1_ops, ...
+% dydphi1_os is output-scaled in phi-space; equivalent to the old dydth1_ops
+% (doubly-scaled theta-space) up to a factor ln(10) on log-param columns.
+% That uniform column scale does not change the SVD collinearity structure.
+% C_pp from PSS is suppressed: the function assumes dydth_ops (column-scaled by thetaHat),
+% but we pass dydphi1_os (column-scaled by thetaHat*ln(10) for log-params), so its
+% D_theta back-transformation produces wrong units.  C_phi1 (§6b) is the correct covariance.
+[si, keep_idx, ~, pi_decomp, epsilon, kappa, gamma] = param_subset_selection(dydphi1_os, ...
     kappa_max, gamma_max, p, thetaHat1);
 
 % keep_idx: indices of identifiable parameters
@@ -465,30 +569,32 @@ x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost);
 % Non-identifiable parameters are fixed at thetaHat1 (their PI #1 values).
 % The same long-vector cost function is reused; only the free variables change.
 
-% --- Initialise fixed and free parameter vectors ------------------------
-thetaFixed  = thetaHat1;          % full vector; non-id entries stay fixed
-theta1_sub  = thetaHat1(keep_idx);
-thetaLB_sub = thetaLB(keep_idx);
-thetaUB_sub = thetaUB(keep_idx);
+% --- Initialise fixed and free parameter vectors in phi-space -----------
+thetaFixed    = thetaHat1;             % full vector; non-id params stay fixed at PI#1 result
+keep_log_mask = ismember(keep_idx, log_idx);   % logical: which subset entries are log-scaled
 
-% --- Objective: embed the free sub-vector back into the full vector -----
-% See utils/costWLS_sub.m
+phi1_sub  = phiHat1(keep_idx);         % phi starting point restricted to identifiable subset
+phiLB_sub = phiLB(keep_idx);
+phiUB_sub = phiUB(keep_idx);
 
-objFun2 = @(theta_sub) costWLS_sub(theta_sub, keep_idx, thetaFixed, ...
+% --- Objective: phi_sub -> theta_sub -> embed in thetaFixed -> WLS cost -
+% See utils/costWLS_sub.m and utils/phi2theta.m
+objFun2 = @(phi_sub) costWLS_sub(phi2theta(phi_sub, keep_log_mask), keep_idx, thetaFixed, ...
               y_meas_long, t_meas_long, out_idx, scale_long, ...
               t_events, u_segments, xi_segments, x0_2, odeFunc, measFunc, odeOptsOpt, J_penalty) / J0;
 
-% --- fmincon options for PI #2 (TypicalX uses the subset estimate) ------
-opts2 = optimoptions(opts1, 'TypicalX',theta1_sub);
+% --- fmincon options for PI #2 (all phi_sub ~ O(1)) --------------------
+opts2 = optimoptions(opts1, 'TypicalX',ones(numel(keep_idx), 1));
 
 % --- Run PI #2 ----------------------------------------------------------
 disp("Running PI2 with fmincon...")
-tic_pi2 = tic; 
-[thetaSub2, fval2, exitflag2, output2] = fmincon(objFun2, theta1_sub, ...
-    [], [], [], [], thetaLB_sub, thetaUB_sub, [], opts2);
+tic_pi2 = tic;
+[phiSub2, fval2, exitflag2, output2] = fmincon(objFun2, phi1_sub, ...
+    [], [], [], [], phiLB_sub, phiUB_sub, [], opts2);
 computing_time_pi2 = toc(tic_pi2); % [s]
 
-% --- Reconstruct the full parameter vector ------------------------------
+% --- Reconstruct full parameter vector in theta-space ------------------
+thetaSub2           = phi2theta(phiSub2, keep_log_mask);
 thetaHat2           = thetaFixed;
 thetaHat2(keep_idx) = thetaSub2;
 
@@ -503,50 +609,56 @@ r_scaled2   = (ySimLong2 - y_meas_long) ./ scale_long;
 RMSE2_auto = sqrt(mean(r_scaled2.^2));
 plotFit(t_meas_long, y_meas_long, ySimLong2, out_idx, p, t_events, u_segments, 'PI #2 --autovalidation fit');
 
-% ---- 10b. Scaled output sensitivity matrix for the identifiable subset --
-% Same FD procedure as 5b, but columns restricted to keep_idx.
-% dydth2 has the same row structure as y_meas_long; it has numel(keep_idx)
-% columns rather than p.nParameters.
-%
-% Step 1: raw FD sensitivities, columns restricted to keep_idx only
+% ---- 10b. Scaled output sensitivity in phi-space for the identifiable subset --
+% Same structure as §6b, columns restricted to keep_idx.
+% keep_log_mask identifies which subset entries are log-scaled.
 
-dydth2_raw = nan(N_long, numel(keep_idx));
+dydphi2_raw = nan(N_long, numel(keep_idx));
 
-disp("Computing FD sensitivities (parfor)...")
+disp("Computing FD sensitivities in phi-space (parfor)...")
 if isempty(gcp('nocreate'))
     parpool(maxNumCores,'IdleTimeout',Inf); % pool that never loses connection
 end
 
 parfor ki = 1:numel(keep_idx)
-    k         = keep_idx(ki);
-    delta_k   = h_rel * abs(thetaHat2(k));
-    if delta_k == 0;  delta_k = h_rel;  end
+    fprintf("Computing FD sensitivities of param %i of %i...\n", ki, numel(keep_idx));
+    phi_fwd_sub   = phiSub2;  phi_fwd_sub(ki) = phiSub2(ki) + h_phi;
+    phi_bwd_sub   = phiSub2;  phi_bwd_sub(ki) = phiSub2(ki) - h_phi;
+    theta_fwd_sub = phi2theta(phi_fwd_sub, keep_log_mask);
+    theta_bwd_sub = phi2theta(phi_bwd_sub, keep_log_mask);
 
-    theta_fwd = thetaHat2;  theta_fwd(k) = thetaHat2(k) + delta_k;
-    theta_bwd = thetaHat2;  theta_bwd(k) = thetaHat2(k) - delta_k;
+    theta_fwd = thetaFixed;  theta_fwd(keep_idx) = theta_fwd_sub;
+    theta_bwd = thetaFixed;  theta_bwd(keep_idx) = theta_bwd_sub;
 
     y_fwd = simulateLong(theta_fwd, t_meas_long, out_idx, t_events, ...
                 u_segments, xi_segments, x0_2, odeFunc, measFunc, odeOptsPost);
     y_bwd = simulateLong(theta_bwd, t_meas_long, out_idx, t_events, ...
                 u_segments, xi_segments, x0_2, odeFunc, measFunc, odeOptsPost);
 
-    dydth2_raw(:,ki) = (y_fwd - y_bwd) ./ (2*delta_k);
+    dydphi2_raw(:,ki) = (y_fwd - y_bwd) ./ (2*h_phi);
 end
-delete(gcp('nocreate')) % Shut down parallel pool
+delete(gcp('nocreate'))
 
-% Step 2: same two-matrix scheme as §6b
-%   dydth2_os  -- output-scaled only (for FIM / Cramer-Rao, physical units)
-%   dydth2     -- also param-scaled by thetaHat2(keep_idx) (for reference/PSS)
+dydphi2_os = dydphi2_raw ./ scale_long;   % (N_long x numel(keep_idx)): output-scaled phi-space
 
-dydth2_os = dydth2_raw ./ scale_long;
-dydth2    = dydth2_os  .* thetaHat2(keep_idx)';
+FIM2_phi = dydphi2_os' * dydphi2_os;
+C_phi2   = inv(FIM2_phi);
+std_phi2 = sqrt(diag(C_phi2));            % std dev of phiSub2 [log10 units for log-params]
 
-FIM2          = dydth2_os' * dydth2_os;
-C_theta2_sub  = inv(FIM2);
-stdTheta2_sub = sqrt(diag(C_theta2_sub));
-stdTheta2_full             = NaN(p.nParameters, 1);
-stdTheta2_full(keep_idx)   = stdTheta2_sub;
-plotUncertainty(thetaHat2, stdTheta2_full, p, ...
+% ±1-sigma confidence interval bounds in theta-space
+thetaSub2_lo              = thetaSub2;
+thetaSub2_hi              = thetaSub2;
+thetaSub2_lo(keep_log_mask)  = thetaSub2(keep_log_mask)  .* 10.^(-std_phi2(keep_log_mask));
+thetaSub2_hi(keep_log_mask)  = thetaSub2(keep_log_mask)  .* 10.^(+std_phi2(keep_log_mask));
+thetaSub2_lo(~keep_log_mask) = thetaSub2(~keep_log_mask) - std_phi2(~keep_log_mask);
+thetaSub2_hi(~keep_log_mask) = thetaSub2(~keep_log_mask) + std_phi2(~keep_log_mask);
+
+% delta-method std in theta-space for plotting
+std_theta2_sub                  = thetaSub2 .* log(10) .* std_phi2;
+std_theta2_sub(~keep_log_mask)  = std_phi2(~keep_log_mask);
+std_theta2_full                 = NaN(n_theta, 1);
+std_theta2_full(keep_idx)       = std_theta2_sub;
+plotUncertainty(thetaHat2, std_theta2_full, p, ...
                 'PI #2 --parameter uncertainty (identifiable subset)');
 
 % ---- 10c. Cross-validation ----------------------------------------------
@@ -569,10 +681,10 @@ plotFitComparison(t_meas_long_CV, y_meas_long_CV, ySimLong1_CV, ySimLong2_CV, ..
     out_idx_CV, p, t_events_CV, u_segments_CV, 'Fit comparison: PI #1 vs PI #2 (cross-validation)');
 
 % ---- 11b. Confidence interval shrinkage ---------------------------------
-% Compare stdTheta1 (all params, PI #1) vs stdTheta2_sub (subset, PI #2)
+% Compare std_theta1 (all params, PI #1) vs std_theta2_sub (subset, PI #2)
 % Expected result: much smaller std devs after PSS because the ill-posed
 %                  directions have been removed.
-plotCIComparison(thetaHat1, stdTheta1, thetaHat2, stdTheta2_sub, ...
+plotCIComparison(thetaHat1, std_theta1, thetaHat2, std_theta2_sub, ...
                  keep_idx, p, 'Parameter uncertainty: PI #1 vs PI #2');
 
 % ---- 11c. Print summary table -------------------------------------------
