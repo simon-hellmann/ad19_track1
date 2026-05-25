@@ -1,4 +1,4 @@
-function x0 = computeX0(theta, data_init, t_ss, x0_rough, odeFunc, odeOpts)
+function x0 = computeX0(theta, data_init, t_ss, x0_init, odeFunc, odeOpts)
 % Dynamic state initialisation in two steps:
 %
 %   Step 1 -- Steady-state pre-simulation
@@ -15,7 +15,7 @@ function x0 = computeX0(theta, data_init, t_ss, x0_rough, odeFunc, odeOpts)
 %   theta      -- current parameter vector (n_params x 1)
 %   data_init  -- init dataset struct from split_data_pss (output of mess2pssData)
 %   t_ss       -- steady-state pre-simulation duration [d], e.g. 500
-%   x0_rough   -- rough initial state (n_states x 1), e.g. from literature
+%   x0_init    -- rough initial state (n_states x 1), e.g. from literature
 %   odeFunc    -- handle: @(x, u, xi, theta) -> f
 %   odeOpts    -- odeset options struct
 %
@@ -38,7 +38,7 @@ function x0 = computeX0(theta, data_init, t_ss, x0_rough, odeFunc, odeOpts)
     xi_avg = (feed_volumes' * data_init.xi_feed)' / total_volume;
 
     [~, xSol_ss] = ode15s(@(t,x) odeFunc(x, u_avg, xi_avg, theta), ...
-                           [0, t_ss], x0_rough(:), odeOpts);
+                           [0, t_ss], x0_init(:), odeOpts);
     x_ss = xSol_ss(end,:)';
 
     % ------------------------------------------------------------------
