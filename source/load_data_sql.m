@@ -18,7 +18,9 @@ close all
 cd(scriptPath);
 
 addpath('utils');
-dataProcessedPath = '../data/processed/automated_feeder/';
+data_raw_path = '../data/raw/'; % only directory
+file_name_raw = 'data_raw_auto_feeder.mat'; 
+full_path_raw = fullfile(data_raw_path, file_name_raw); 
 
 %% User settings
 
@@ -75,7 +77,7 @@ fprintf("  %d rows returned.\n", height(tbl_online));
 % MATLAB returns TIMESTAMPTZ columns as timezone-aware datetime objects;
 % subtracting T_start (also timezone-aware) gives correct relative times
 % across DST transitions.
-t_abs_online = tbl_online.time;                  % datetime (TIMESTAMPTZ, timezone-aware)
+t_abs_online = tbl_online.time;                  % datetime (TIMESTAMPTZ, timezone-aware, in UTC)
 t_rel_online = days(t_abs_online - T_start);     % [d] relative to T_start
 
 data_full.tMeas = cell(6, 1);
@@ -291,6 +293,6 @@ fprintf("  feed events: %d bundled from %d raw timestamps (%d substrate entries)
 
 %% Save
 
-fprintf("\nSaving data_full to %s...\n", dataProcessedPath);
-save(fullfile(dataProcessedPath, 'data_full.mat'), 'data_full');
-fprintf("Saved: data_full.mat\n");
+fprintf("\nSaving data_full to %s...\n", data_raw_path);
+save(full_path_raw, 'data_full');
+fprintf("Saved: full dataset.mat\n");

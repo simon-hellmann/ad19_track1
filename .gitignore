@@ -21,23 +21,6 @@
 *.tar
 *.zip
 
-# Logs and databases #
-######################
-*.log
-*.sql
-*.sqlite
-
-# Matlab files #
-################
-*.asv
-
-# Folder path (for bots copied file) #
-#################
-/data/raw/*
-/data/generated/Boulkroune*
-/data/generated/*.csv
-/source/EKF_postgreSQL_git_checkout
-
 # OS generated files #
 ######################
 .DS_Store
@@ -55,6 +38,20 @@ Thumbs.db
 ###########################
 *.tmp
 
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+
 # Configs #
 ###########
 *db_config.json
+
+# Matlab files #
+################
+*.asv
+
+# Folder path (for bots copied file) #
+#################
+/data/generated/*.csv

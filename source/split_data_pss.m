@@ -26,9 +26,7 @@ dataProcessedPath = '../data/processed/';
 %% -----------------------------------------------------------------------
 %  USER SETTINGS -- adjust for each dataset
 % -----------------------------------------------------------------------
-
-% --- raw data file (place in data/raw/) ---------------------------------
-rawFileName = 'MESS_struct_IntBePro_R36_mod_gasflow.mat';    % update to actual filename
+flag_raw_file = 'feeder'; % 'feeder' | 'intensiv'
 
 % --- time window boundaries ---------------------------------------------
 % Adjust these datetimes to match the dataset in use.
@@ -49,8 +47,22 @@ T_cross_end   = datetime('05-Aug-2022 15:00:00', 'InputFormat', 'dd-MMM-yyyy HH:
 %  LOAD RAW DATA
 % -----------------------------------------------------------------------
 
-fprintf('Loading raw data from %s...\n', fullfile(dataRawPath, rawFileName));
-load(fullfile(dataRawPath, rawFileName), 'MESS');
+% --- raw data file (place in data/raw/) ---------------------------------
+switch flag_raw_file
+    case 'intensiv'
+        rawFileName = 'MESS_struct_IntBePro_R36_mod_gasflow.mat'; 
+        full_path_raw = fullfile(dataRawPath, rawFileName);
+        fprintf('Loading raw data from %s...\n', full_path_raw);
+        load(fullfile(dataRawPath, rawFileName), 'MESS');
+    case 'feeder'
+        rawFileName = 'data_raw_auto_feeder.mat';     
+        full_path_raw = fullfile(dataRawPath, rawFileName);
+        fprintf('Loading raw data from %s...\n', full_path_raw);
+        load(fullfile(dataRawPath, rawFileName), 'data_full');
+        MESS = data_full; % rename so compatible with the remaining script
+    otherwise 
+        error('Invalid raw file source!')
+end
 fprintf('Done.\n');
 
 %% -----------------------------------------------------------------------
