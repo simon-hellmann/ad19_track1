@@ -21,7 +21,9 @@ function MESS_cut = cutMESS(MESS, T_start, T_end)
     MESS_cut = MESS;
 
     % --- online gas (gasflow, methane, co2 share one time vector) ---------
-    mask = MESS.online_gas.time < T_start | MESS.online_gas.time > T_end;
+    % Half-open interval [T_start, T_end): exclude T_end so contiguous windows
+    % do not share boundary samples.
+    mask = MESS.online_gas.time < T_start | MESS.online_gas.time >= T_end;
     MESS_cut.online_gas.time(mask)    = [];
     MESS_cut.online_gas.gasflow(mask) = [];
     MESS_cut.online_gas.methane(mask) = [];
@@ -30,25 +32,25 @@ function MESS_cut = cutMESS(MESS, T_start, T_end)
         days(MESS_cut.online_gas.time - T_start);
 
     % --- online liquid (pH) -----------------------------------------------
-    mask = MESS.online_liq.time < T_start | MESS.online_liq.time > T_end;
+    mask = MESS.online_liq.time < T_start | MESS.online_liq.time >= T_end;
     MESS_cut.online_liq.time(mask) = [];
     MESS_cut.online_liq.pH(mask)   = [];
     MESS_cut.online_liq.rel_time   = days(MESS_cut.online_liq.time - T_start);
 
     % --- offline acetate --------------------------------------------------
-    mask = MESS.offline_ac_eq.time < T_start | MESS.offline_ac_eq.time > T_end;
+    mask = MESS.offline_ac_eq.time < T_start | MESS.offline_ac_eq.time >= T_end;
     MESS_cut.offline_ac_eq.time(mask)  = [];
     MESS_cut.offline_ac_eq.ac_eq(mask) = [];
     MESS_cut.offline_ac_eq.rel_time    = days(MESS_cut.offline_ac_eq.time - T_start);
 
     % --- offline inorganic nitrogen ---------------------------------------
-    mask = MESS.offline_nh3.time < T_start | MESS.offline_nh3.time > T_end;
+    mask = MESS.offline_nh3.time < T_start | MESS.offline_nh3.time >= T_end;
     MESS_cut.offline_nh3.time(mask) = [];
     MESS_cut.offline_nh3.sin(mask)  = [];
     MESS_cut.offline_nh3.rel_time   = days(MESS_cut.offline_nh3.time - T_start);
 
     % --- feeding events ---------------------------------------------------
-    mask = MESS.feed.time < T_start | MESS.feed.time > T_end;
+    mask = MESS.feed.time < T_start | MESS.feed.time >= T_end;
     MESS_cut.feed.time(mask)        = [];
     MESS_cut.feed.mass(mask)        = [];
     MESS_cut.feed.charac(mask, :)   = [];

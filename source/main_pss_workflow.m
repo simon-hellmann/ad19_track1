@@ -46,8 +46,8 @@ rng(42);
 % --- Workflow flags -------------------------------------------------------
 model_name      = "ADM1-R3-x1";  % model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM1-R3-x2"
 flag_skip_lhs   = false;         % true → skip LHS pre-search, start PI #1 from theta0
-flag_omit_co2   = true;          % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 suffice
-delta_feed_min  = 10;            % assumed feeding duration [min] — sets bolus flow amplitude
+flag_omit_co2    = true;   % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 suffice
+feeding_duration = 10;    % assumed feeding duration [min] — sets bolus flow amplitude
 
 %% -----------------------------------------------------------------------
 %  2. MODEL DEFINITION & NOMINAL PARAMETERS
@@ -130,55 +130,38 @@ load('../data/processed/data_init.mat',  'data_init');
 load('../data/processed/data_auto.mat',  'data_auto');
 load('../data/processed/data_cross.mat', 'data_cross');
 
-% --- Recompute feed event duration and flow rate -------------------------
-% delta_feed_min (set in section 1) controls the assumed bolus duration.
-% A shorter duration raises the instantaneous flow rate for the same total
-% feed mass; a longer one lowers it.  Changing it here avoids re-running
-% split_data_pss.m: feed volumes are recovered from the stored values
-% (feed_volume = u_feed_value * delta_feed_days_stored), then recomputed
-% for the new duration.  Must run before preprocessData because t_feed_end
-% enters the gas-measurement exclusion windows.
-delta_feed_days          = delta_feed_min / (24*60);                              % [d]
-delta_feed_days_stored   = data_auto.t_feed_end(1) - data_auto.t_feed_start(1);  % [d] as saved
+% --- Convert feeding_duration to [d] and derive flow rates ---------------
+% feeding_duration (set in section 1) sets the bolus duration.
+% A shorter duration raises the instantaneous flow rate for the same feed
+% mass; a longer one lowers it.
+rho_feed           = 1000;                        % [kg/m^3] substrate density
+feeding_duration_d = feeding_duration / (24*60);  % [d]
 
-feed_vol_init  = data_init.u_feed_value  .* delta_feed_days_stored;  % [m^3]
-feed_vol_auto  = data_auto.u_feed_value  .* delta_feed_days_stored;  % [m^3]
-feed_vol_cross = data_cross.u_feed_value .* delta_feed_days_stored;  % [m^3]
-
-data_init.t_feed_end   = data_init.t_feed_start  + delta_feed_days;
-data_init.u_feed_value = feed_vol_init            / delta_feed_days;  % [m^3/d]
-
-data_auto.t_feed_end   = data_auto.t_feed_start   + delta_feed_days;
-data_auto.u_feed_value = feed_vol_auto             / delta_feed_days;  % [m^3/d]
-
-data_cross.t_feed_end   = data_cross.t_feed_start  + delta_feed_days;
-data_cross.u_feed_value = feed_vol_cross            / delta_feed_days;  % [m^3/d]
-
-data_auto  = preprocessData(data_auto,  prepOpts);
-data_cross = preprocessData(data_cross, prepOpts);
+data_auto  = preprocessData(data_auto,  prepOpts, feeding_duration_d);
+data_cross = preprocessData(data_cross, prepOpts, feeding_duration_d);
 
 % Unpack training (auto-validation) dataset:
 %   tMeas{i}        -- (n_i x 1) measurement times per output [d]
 %   yMeas{i}        -- (n_i x 1) measured values per output
 %   t_feed_start    -- (n_events x 1) feed start times [d]
-%   t_feed_end      -- (n_events x 1) feed end times [d]
-%   u_feed_value    -- (n_events x 1) feed volume flow [m^3/d]
+%   t_feed_end      -- derived: t_feed_start + feeding_duration_d [d]
+%   u_feed_value    -- derived: feed_mass / (rho_feed * feeding_duration_d) [m^3/d]
 %   t0, tf          -- simulation window [d]
 tMeas        = data_auto.tMeas;
 yMeas        = data_auto.yMeas;
 t_feed_start = data_auto.t_feed_start;
-t_feed_end   = data_auto.t_feed_end;
-u_feed_value = data_auto.u_feed_value;
+t_feed_end   = t_feed_start + feeding_duration_d;
+u_feed_value = data_auto.feed_mass ./ (rho_feed * feeding_duration_d);
 t0           = data_auto.t0;
 tf           = data_auto.tf;
 n_out        = 6; % # model output channels
 
-% Unpack cross-validation dataset (same fields, _CV suffix):
-tMeasCV        = data_cross.tMeas;
-yMeasCV        = data_cross.yMeas;
+% Unpack cross-validation dataset (same derivation, _CV suffix):
+tMeasCV         = data_cross.tMeas;
+yMeasCV         = data_cross.yMeas;
 t_feed_start_CV = data_cross.t_feed_start;
-t_feed_end_CV   = data_cross.t_feed_end;
-u_feed_value_CV = data_cross.u_feed_value;
+t_feed_end_CV   = t_feed_start_CV + feeding_duration_d;
+u_feed_value_CV = data_cross.feed_mass ./ (rho_feed * feeding_duration_d);
 t0_CV           = data_cross.t0;
 tf_CV           = data_cross.tf;
 
@@ -305,7 +288,7 @@ x0_init = [0.049; % S_ac
             0.358; % S_ch4_gas
             0.660];% S_co2_gas
 t_ss     = 500;     % [d] pre-simulation duration for steady-state
-x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt);
+x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, feeding_duration_d);
 
 %% -----------------------------------------------------------------------
 %  4b. LATIN HYPERCUBE SAMPLING -- GLOBAL PRE-SEARCH FOR PI #1
@@ -436,11 +419,13 @@ thetaHat1 = phi2theta(phiHat1, log_idx);   % convert phi-space result to physica
 % ---- 5a. Simulate with thetaHat1 and compute fit quality ---------------
 % ySimLong1 has the same row ordering as y_meas_long (time-sorted).
 
-[ySimLong1, x0_CV, t_fine1, ~, y_fine1] = simulateLong(thetaHat1, t_meas_long, out_idx, ...
-    t_events, u_segments, xi_segments, x0, odeFunc, measFunc, odeOptsPost, dt_fine);
+[ySimLong1, x0_CV, t_fine1, ~, y_fine1] = simulateLong(thetaHat1, t_meas_long, ...
+    out_idx, t_events, u_segments, xi_segments, x0, odeFunc, measFunc, ...
+    odeOptsPost, dt_fine);
 r_scaled1  = (ySimLong1 - y_meas_long) ./ scale_long;
 RMSE1_auto = sqrt(mean(r_scaled1.^2));
-plotFit(t_meas_long, y_meas_long, t_fine1, y_fine1, out_idx, p, t_events, u_segments, 'PI #1 --autovalidation fit');
+plotFit(t_meas_long, y_meas_long, t_fine1, y_fine1, out_idx, p, t_events, ...
+    u_segments, 'PI #1 --autovalidation fit');
 
 [J1, J_ch1, r_scaled_cell1] = costWLS(thetaHat1, y_meas_long, ...
         t_meas_long, out_idx, scale_long, t_events, u_segments, ...
@@ -529,21 +514,22 @@ plotFit(t_meas_long_CV, y_meas_long_CV, t_fine1_CV, y_fine1_CV, out_idx_CV, p, .
 % parameter subset (see subsetSelection.m -- Lopez et al., 2015).
 
 % --- PSS thresholds ------------------------------
-kappa_max = 250; % maximum condition number
+kappa_max = 500; % maximum condition number
 gamma_max = 15;   % maximum collinearity index
 
 % --- Run PSS ------------------------------------------------------------
-% dydphi1_os is output-scaled in phi-space; equivalent to the old dydth1_ops
-% (doubly-scaled theta-space) up to a factor ln(10) on log-param columns.
+% dydphi1_os is output-scaled in phi-space; equivalent to output-and-
+% parameter-scaled dydth1_ops up to a factor ln(10) on log-param columns.
 % That uniform column scale does not change the SVD collinearity structure.
-% C_pp from PSS is suppressed: the function assumes dydth_ops (column-scaled by thetaHat),
-% but we pass dydphi1_os (column-scaled by thetaHat*ln(10) for log-params), so its
-% D_theta back-transformation produces wrong units.  C_phi1 (§6b) is the correct covariance.
-[si, keep_idx, ~, pi_decomp, epsilon, kappa, gamma] = param_subset_selection(dydphi1_os, ...
-    kappa_max, gamma_max, p, thetaHat1);
+% C_pp from PSS is suppressed: the function assumes dydth_ops (double-scaled 
+% by outputs and thetaHat), but we pass dydphi1_os (scaled by thetaHat*ln(10)
+% for log-params), so its D_theta back-transformation produces wrong units. 
+% C_phi1 (§6b) is the correct covariance.
+[si, keep_idx, ~, pi_decomp, epsilon, kappa, gamma] = param_subset_selection(...
+    dydphi1_os, kappa_max, gamma_max, p, thetaHat1);
 
 % keep_idx: indices of identifiable parameters
-% The complement can be fixed at thetaHat1 or at literature values.
+% The complement should be fixed at thetaHat1 or at literature values.
 
 % --- Summarise PSS result -----------------------------------------------
 fprintf('\nPSS result: %d / %d parameters are identifiable.\n', ...
@@ -562,7 +548,7 @@ plotVarianceDecomposition(pi_decomp, p, 'PSS --variance decomposition');
 % is no longer the best initial condition.  Repeat the same two-step
 % procedure with thetaHat1 to obtain x0_2.
 
-x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost);
+x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost, feeding_duration_d);
 
 % For cross-validation, data_cross immediately follows data_auto in time,
 % so x0_CV is the terminal state of the auto simulation (captured in §6).

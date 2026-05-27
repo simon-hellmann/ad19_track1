@@ -20,7 +20,6 @@
 %               .tMeas          -- {n_out x 1} cell, measurement times per channel [d]
 %               .yMeas          -- {n_out x 1} cell, measured values per channel
 %               .t_feed_start   -- (n_ev x 1) feed event start times               [d]
-%               .t_feed_end     -- (n_ev x 1) feed event end times                 [d]
 %               (all other fields are passed through unchanged)
 %
 %   opts:       exclusion options struct with fields
@@ -36,10 +35,15 @@
 %               .q_gas_min          -- minimum valid gas production value [m^3/d]
 %                                      samples below this are always excluded
 %
+%   feeding_duration  -- scalar, feeding event duration [d]; used to compute
+%                        t_feed_end = t_feed_start + feeding_duration
+%
 
-function data_out = preprocessData(data_in, opts)
+function data_out = preprocessData(data_in, opts, feeding_duration)
 
 data_out = data_in;   % pass all fields through; overwrite gas channel below
+
+t_feed_end = data_in.t_feed_start + feeding_duration;   % [d], local only
 
 % --- Collect exclusion intervals [t_lo, t_hi] ----------------------------
 intervals = zeros(0, 2);   % (n_intervals x 2)
@@ -48,7 +52,7 @@ if opts.flag_filter_feed
     n_ev = numel(data_in.t_feed_start);
     for ev_k = 1:n_ev
         t_lo = data_in.t_feed_start(ev_k) - opts.dt_feed_before;
-        t_hi = data_in.t_feed_end(ev_k)   + opts.dt_feed_after;
+        t_hi = t_feed_end(ev_k)            + opts.dt_feed_after;
         intervals(end+1, :) = [t_lo, t_hi];
     end % for
 end

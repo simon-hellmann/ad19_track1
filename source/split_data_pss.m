@@ -30,13 +30,6 @@ dataProcessedPath = '../data/processed/';
 % --- raw data file (place in data/raw/) ---------------------------------
 rawFileName = 'MESS_struct_IntBePro_R36_mod_gasflow.mat';    % update to actual filename
 
-% --- feeding event settings ---------------------------------------------
-delta_feed_min  = 5;               % feeding duration [min]
-delta_feed_days = delta_feed_min / (24*60);   % convert to days
-
-rho_substrate   = 1000;            % substrate density [kg/m^3]
-                                   % used to convert feed mass -> volume flow
-
 % --- time window boundaries ---------------------------------------------
 % Adjust these datetimes to match the dataset in use.
 
@@ -84,9 +77,9 @@ fprintf('  Cross: %2d feed events, abs. t = [%5.1f, %5.1f] d\n', ...
 % -----------------------------------------------------------------------
 
 fprintf('Converting to PSS data format...\n');
-data_init  = mess2pssData(data_init,  delta_feed_days, rho_substrate);
-data_auto  = mess2pssData(data_auto,  delta_feed_days, rho_substrate);
-data_cross = mess2pssData(data_cross, delta_feed_days, rho_substrate);
+data_init  = mess2pssData(data_init);
+data_auto  = mess2pssData(data_auto);
+data_cross = mess2pssData(data_cross);
 
 %% -----------------------------------------------------------------------
 %  SANITY CHECKS
@@ -108,7 +101,7 @@ for dataset_k = 1:3
     end
 end
 
-% Check that windows do not overlap
+% Check that windows do not overlap (windows are half-open [start, end))
 if T_init_end > T_auto_start
     warning('split_data_pss: init and auto windows overlap.');
 end
