@@ -24,10 +24,10 @@ addpath('utils');
 
 %% User settings
 
-dataset = 'automated_feeder';   % 'intensiv' | 'automated_feeder'
+dataset = 'intensiv';   % 'intensiv' | 'automated_feeder'
 
 % --- Preprocessing options (gas channel 1; applied to the full dataset) --
-feeding_duration              = 10/(24*60);  % [d] feeding pulse length
+feeding_duration              = 15/(24*60);  % [d] feeding pulse length
 
 % --- Time window boundaries (absolute datetimes; adjust per dataset) -----
 switch dataset
