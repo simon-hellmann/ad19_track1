@@ -1,5 +1,6 @@
 %% main_pss_workflow.m
-% Full workflow: Parameter Identification -> PSS -> Parameter Identification
+% AD19 workshop 'AD modeling toolbox': part 2, parallel session 3
+% Parameter Identification -> PSS -> Parameter Identification
 %
 % Goal: Show that PSS yields comparable fit quality while drastically
 %       reducing parameter uncertainty (wider confidence intervals before
@@ -46,11 +47,11 @@ addpath('model_files/model_data');
 rng(42);
 
 % --- Workflow flags -------------------------------------------------------
-dataset          = 'intensiv';  % 'intensiv' | 'automated_feeder'
+dataset          = 'automated_feeder';  % 'intensiv' | 'automated_feeder'
 model_name       = "ADM1-R3-x1";% model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM1-R3-x2"
-flag_skip_lhs    = false;       % true → skip LHS pre-search, start PI #1 from theta0
-flag_omit_co2    = true;        % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 suffice
-feeding_duration = 10/(24*60);  % [d] feeding pulse length — affects amplitude of feed volume flow
+flag_skip_lhs    = true;        % true → skip LHS pre-search, start PI #1 from theta0
+flag_omit_co2    = true;        % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 are enough
+flag_plot_x0     = false;       % true → open SS + swing-up diagnostic plots from computeX0
 dt_fine = 10/1440;              % [d] fine time-grid resolution for smooth output plots
 
 %% -----------------------------------------------------------------------
@@ -58,8 +59,14 @@ dt_fine = 10/1440;              % [d] fine time-grid resolution for smooth outpu
 % -----------------------------------------------------------------------
 
 % --- Reactor dimensions --------------------------------------------------
-V_liq = 0.012;   % liquid volume [m^3]
-V_gas = 0.003;   % gas headspace volume [m^3]
+switch dataset
+    case 'intensiv'
+        V_liq = 0.012;   % liquid volume [m^3]
+        V_gas = 0.003;   % gas headspace volume [m^3]
+    case 'automated_feeder'
+        V_liq = 0.011;   % liquid volume [m^3]
+        V_gas = 0.004;   % gas headspace volume [m^3]
+end
 
 % --- Load ADM1 physico-chemical constants --------------------------------
 load('ADM1_parameters.mat', 'parameters');
@@ -98,7 +105,7 @@ phiUB = thetaUB;  phiUB(log_idx) = log10(thetaUB(log_idx));
 % up cost evaluations. NonNegative prevents ode15s driving biological
 % concentration states below zero.
 non_negative_state_idx = 1:14;
-odeOptsOpt  = odeset('RelTol', 1e-7, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
+odeOptsOpt  = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
                      'NonNegative', non_negative_state_idx);
 % Tight tolerances for post-processing (FD sensitivity, CV, plots):
 odeOptsPost = odeset('RelTol', 1e-8, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
@@ -108,6 +115,9 @@ odeOptsPost = odeset('RelTol', 1e-8, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
 % Units: [m^3/d, bar, bar, -, g/L, g/L]
 sigmaY = [4e-4, 1.78e-2, 2.68e-2, 2e-2, 0.12, 5e-2];
 
+% --- LHS pre-screening (only valid if flag_skip_lhs=false) --------------
+N_LHS = 100;
+
 %% -----------------------------------------------------------------------
 %  3. LOAD & PREPROCESS DATASETS
 % -----------------------------------------------------------------------
@@ -115,9 +125,10 @@ sigmaY = [4e-4, 1.78e-2, 2.68e-2, 2e-2, 0.12, 5e-2];
 % Note: Run prepare_data.m first (with the same dataset flag) to generate these files.
 %
 proc_dir = fullfile('..', 'data', 'processed', dataset);
-load(fullfile(proc_dir, 'data_init.mat'),  'data_init');
-load(fullfile(proc_dir, 'data_auto.mat'),  'data_auto');
-load(fullfile(proc_dir, 'data_cross.mat'), 'data_cross');
+load(fullfile(proc_dir, 'data_init.mat'),        'data_init');
+load(fullfile(proc_dir, 'data_auto.mat'),        'data_auto');
+load(fullfile(proc_dir, 'data_cross.mat'),       'data_cross');
+load(fullfile(proc_dir, 'feeding_duration.mat'), 'feeding_duration');
 
 % --- Derive feed flow rates -----------------------------------------------
 rho_feed = 1000;   % [kg/m^3] substrate density
@@ -270,7 +281,7 @@ x0_init = [0.049; % S_ac
             0.358; % S_ch4_gas
             0.660];% S_co2_gas
 t_ss     = 500;     % [d] pre-simulation duration for steady-state
-x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, feeding_duration);
+x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, feeding_duration, flag_plot_x0);
 
 %% -----------------------------------------------------------------------
 %  4b. LATIN HYPERCUBE SAMPLING -- GLOBAL PRE-SEARCH FOR PI #1
@@ -284,7 +295,6 @@ x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, feeding_du
 %    - Parameters 1-7 and 9 (strictly positive bounds): log10-scale.
 %    - Parameter 8 (Delta_S_ion, LB = -1e-2 < 0): linear scale.
 
-N_LHS       = 100;
 J_penalty   = 1e10;
 maxNumCores = feature('numCores');
 
@@ -377,14 +387,14 @@ opts1 = optimoptions('fmincon', ...
     'FiniteDifferenceType',     'central', ...
     'FiniteDifferenceStepSize', fd_stepSize, ...
     'HessianApproximation',     'lbfgs', ...    % default 10-pair memory; 4 pairs caused cost
-    ...                                     %   to increase in early iterations (Hessian too coarse)
-    'StepTolerance',            1e-10, ...  % near MATLAB default: larger values fire SOONER
-    ...                                     %   (step must shrink BELOW threshold to trigger)
+    ...                                     % to increase in early iterations (Hessian too coarse)
+    'StepTolerance',            1e-10, ...  % MATLAB default: larger values fire SOONER
+    ...                                     % (step must shrink BELOW threshold to trigger)
     'OptimalityTolerance',      1e-3, ...   % ~46x above gradient noise floor (≈2e-5):
     ...                                     %   only stop when slope is genuinely flat
     'TypicalX',                 ones(n_theta, 1), ...   % phi ~ O(1) for all params
-    'MaxFunctionEvaluations',   5000, ...
-    'MaxIterations',            2000);
+    'MaxFunctionEvaluations',   3000, ...
+    'MaxIterations',            500);
 
 % --- Run PI #1 (starting from best LHS candidate) -----------------------
 disp("Running PI1 with fmincon...")
@@ -530,7 +540,7 @@ plotVarianceDecomposition(pi_decomp, p, 'PSS --variance decomposition');
 % is no longer the best initial condition.  Repeat the same two-step
 % procedure with thetaHat1 to obtain x0_2.
 
-x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost, feeding_duration);
+x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost, feeding_duration, flag_plot_x0);
 
 % For cross-validation, data_cross immediately follows data_auto in time,
 % so x0_CV is the terminal state of the auto simulation (captured in §6).
@@ -668,4 +678,5 @@ fprintf('%-30s  %.4f | %.4f\n', 'PI #1 (full set)',     RMSE1_auto, RMSE1_cv);
 fprintf('%-30s  %.4f | %.4f\n', 'PI #2 (PSS subset)',   RMSE2_auto, RMSE2_cv);
 
 % save workspace: 
-save(fprintf('/Users/simonhellmann/Documents/GIT/ad19_track1/data/generated/workspace_run%i.mat', run_id))
+save(fprintf('/Users/simonhellmann/Documents/GIT/ad19_track1/data/generated/workspace_run%i.mat\n', run_id))
+ 

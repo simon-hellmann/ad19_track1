@@ -37,10 +37,10 @@ end
 ref_tz = data_in.T_start.TimeZone;
 if ~isempty(ref_tz)
     if isempty(T_start.TimeZone)
-        T_start = datetime(T_start, 'TimeZone',ref_tz);
+        T_start.TimeZone = ref_tz;
     end
     if isempty(T_end.TimeZone)
-        T_end = datetime(T_end, 'TimeZone',ref_tz);
+        T_end.TimeZone = ref_tz;
     end
 end
 

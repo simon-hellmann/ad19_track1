@@ -28,16 +28,6 @@ dataset = 'automated_feeder';   % 'intensiv' | 'automated_feeder'
 
 % --- Preprocessing options (gas channel 1; applied to the full dataset) --
 feeding_duration              = 10/(24*60);  % [d] feeding pulse length
-preproc_opts.flag_filter_feed = true;   % true: remove gas data around feedings
-preproc_opts.flag_filter_IN   = true;   % true: remove gas data around IN samples
-preproc_opts.flag_filter_AC   = true;   % true: remove gas data around AC samples
-preproc_opts.dt_feed_before   = 1/24;   % [d] 
-preproc_opts.dt_feed_after    = 2/24;   % [d] 
-preproc_opts.dt_IN_before     = 0.5/24; % [d] 
-preproc_opts.dt_IN_after      = 1/24;   % [d]
-preproc_opts.dt_AC_before     = 0.5/24; % [d]
-preproc_opts.dt_AC_after      = 1/24;   % [d]
-preproc_opts.q_gas_min        = 0.002;  % [m³/d] below this: exclude
 
 % --- Time window boundaries (absolute datetimes; adjust per dataset) -----
 switch dataset
@@ -49,6 +39,16 @@ switch dataset
         T_cross_start = datetime('15-Jul-2022 00:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss');
         T_cross_end   = datetime('05-Aug-2022 15:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss');
 
+        preproc_opts.flag_filter_feed = true;   % true: remove gas data around feedings
+        preproc_opts.flag_filter_IN   = true;   % true: remove gas data around IN samples
+        preproc_opts.flag_filter_AC   = true;   % true: remove gas data around AC samples
+        preproc_opts.dt_feed_before   = 1/24;   % [d] 
+        preproc_opts.dt_feed_after    = 2/24;   % [d] 
+        preproc_opts.dt_IN_before     = 0.5/24; % [d] 
+        preproc_opts.dt_IN_after      = 1/24;   % [d]
+        preproc_opts.dt_AC_before     = 0.5/24; % [d]
+        preproc_opts.dt_AC_after      = 1/24;   % [d]
+        preproc_opts.q_gas_min        = 0.002;  % [m³/d] below this: exclude
     case 'automated_feeder'
         % Adjust these boundaries to match your desired analysis period
         T_init_start  = datetime('29-Apr-2026 00:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss', 'TimeZone','Europe/Berlin');
@@ -57,7 +57,11 @@ switch dataset
         T_auto_end    = datetime('18-May-2026 00:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss', 'TimeZone','Europe/Berlin');
         T_cross_start = datetime('18-May-2026 00:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss', 'TimeZone','Europe/Berlin');
         T_cross_end   = datetime('27-May-2026 12:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss', 'TimeZone','Europe/Berlin');
-
+        
+        preproc_opts.flag_filter_feed = false;   % true: remove gas data around feedings
+        preproc_opts.flag_filter_IN   = false;   % true: remove gas data around IN samples
+        preproc_opts.flag_filter_AC   = false;   % true: remove gas data around AC samples
+        preproc_opts.q_gas_min        = 0.002;  % [m³/d] below this: exclude
     otherwise
         error('prepare_data: unknown dataset ''%s''.', dataset);
 end
@@ -134,8 +138,9 @@ end
 %% Save
 
 fprintf("Saving to %s...\n", processed_dir);
-save(fullfile(processed_dir, 'data_init.mat'),  'data_init');
-save(fullfile(processed_dir, 'data_auto.mat'),  'data_auto');
-save(fullfile(processed_dir, 'data_cross.mat'), 'data_cross');
+save(fullfile(processed_dir, 'data_init.mat'),       'data_init');
+save(fullfile(processed_dir, 'data_auto.mat'),       'data_auto');
+save(fullfile(processed_dir, 'data_cross.mat'),      'data_cross');
+save(fullfile(processed_dir, 'feeding_duration.mat'), 'feeding_duration');
 fprintf("Saved: data_init.mat, data_auto.mat, data_cross.mat\n");
 fprintf("Done.\n");
