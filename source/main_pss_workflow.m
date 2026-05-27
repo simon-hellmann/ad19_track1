@@ -35,7 +35,7 @@ clear; clc; close all;
 %  1. SETUP & PATHS
 % -----------------------------------------------------------------------
 
-run_id = 2; 
+run_id = 3; % document in list of runs (user's responsibility)
 
 % add subfolders (model files, helper functions, PSS routine, etc.)
 addpath('model_files');
@@ -46,10 +46,12 @@ addpath('model_files/model_data');
 rng(42);
 
 % --- Workflow flags -------------------------------------------------------
-model_name      = "ADM1-R3-x1";  % model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM1-R3-x2"
-flag_skip_lhs   = false;         % true → skip LHS pre-search, start PI #1 from theta0
-flag_omit_co2    = true;   % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 suffice
-feeding_duration = 10;    % assumed feeding duration [min] — sets bolus flow amplitude
+dataset          = 'intensiv';  % 'intensiv' | 'automated_feeder'
+model_name       = "ADM1-R3-x1";% model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM1-R3-x2"
+flag_skip_lhs    = false;       % true → skip LHS pre-search, start PI #1 from theta0
+flag_omit_co2    = true;        % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 suffice
+feeding_duration = 10/(24*60);  % [d] feeding pulse length — affects amplitude of feed volume flow
+dt_fine = 10/1440;              % [d] fine time-grid resolution for smooth output plots
 
 %% -----------------------------------------------------------------------
 %  2. MODEL DEFINITION & NOMINAL PARAMETERS
@@ -106,54 +108,32 @@ odeOptsPost = odeset('RelTol', 1e-8, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
 % Units: [m^3/d, bar, bar, -, g/L, g/L]
 sigmaY = [4e-4, 1.78e-2, 2.68e-2, 2e-2, 0.12, 5e-2];
 
-% --- Gas measurement preprocessing options -------------------------------
-% Gas production (ch 1) is disturbed by feeding and by IN/AC grab sampling.
-% Set flags to exclude affected windows; adjust dt values for asymmetric masks.
-prepOpts.flag_filter_feed   = true;
-prepOpts.flag_filter_IN     = true;
-prepOpts.flag_filter_AC     = true;
-prepOpts.dt_feed_before     = 30 / 1440;   % [d]
-prepOpts.dt_feed_after      = 30 / 1440;   % [d]
-prepOpts.dt_IN_before       = 30 / 1440;   % [d]
-prepOpts.dt_IN_after        = 30 / 1440;   % [d]
-prepOpts.dt_AC_before       = 30 / 1440;   % [d]
-prepOpts.dt_AC_after        = 30 / 1440;   % [d]
-prepOpts.q_gas_min          = 3  / 1000;   % [m^3/d] — measurements below this are always excluded
-
-dt_fine = 10/1440;   % [d] = 10 min, fine time-grid resolution for smooth output plots
-
 %% -----------------------------------------------------------------------
 %  3. LOAD & PREPROCESS DATASETS
 % -----------------------------------------------------------------------
 
-% Note: Run split_data_pss.m first to generate these files from the raw MESS struct.
+% Note: Run prepare_data.m first (with the same dataset flag) to generate these files.
 %
-load('../data/processed/data_init.mat',  'data_init');
-load('../data/processed/data_auto.mat',  'data_auto');
-load('../data/processed/data_cross.mat', 'data_cross');
+proc_dir = fullfile('..', 'data', 'processed', dataset);
+load(fullfile(proc_dir, 'data_init.mat'),  'data_init');
+load(fullfile(proc_dir, 'data_auto.mat'),  'data_auto');
+load(fullfile(proc_dir, 'data_cross.mat'), 'data_cross');
 
-% --- Convert feeding_duration to [d] and derive flow rates ---------------
-% feeding_duration (set in section 1) sets the bolus duration.
-% A shorter duration raises the instantaneous flow rate for the same feed
-% mass; a longer one lowers it.
-rho_feed           = 1000;                        % [kg/m^3] substrate density
-feeding_duration_d = feeding_duration / (24*60);  % [d]
-
-data_auto  = preprocessData(data_auto,  prepOpts, feeding_duration_d);
-data_cross = preprocessData(data_cross, prepOpts, feeding_duration_d);
+% --- Derive feed flow rates -----------------------------------------------
+rho_feed = 1000;   % [kg/m^3] substrate density
 
 % Unpack training (auto-validation) dataset:
 %   tMeas{i}        -- (n_i x 1) measurement times per output [d]
 %   yMeas{i}        -- (n_i x 1) measured values per output
 %   t_feed_start    -- (n_events x 1) feed start times [d]
-%   t_feed_end      -- derived: t_feed_start + feeding_duration_d [d]
-%   u_feed_value    -- derived: feed_mass / (rho_feed * feeding_duration_d) [m^3/d]
+%   t_feed_end      -- derived: t_feed_start + feeding_duration [d]
+%   u_feed_value    -- derived: feed_mass / (rho_feed * feeding_duration) [m^3/d]
 %   t0, tf          -- simulation window [d]
 tMeas        = data_auto.tMeas;
 yMeas        = data_auto.yMeas;
 t_feed_start = data_auto.t_feed_start;
-t_feed_end   = t_feed_start + feeding_duration_d;
-u_feed_value = data_auto.feed_mass ./ (rho_feed * feeding_duration_d);
+t_feed_end   = t_feed_start + feeding_duration;
+u_feed_value = data_auto.feed_mass ./ (rho_feed * feeding_duration);
 t0           = data_auto.t0;
 tf           = data_auto.tf;
 n_out        = 6; % # model output channels
@@ -162,8 +142,8 @@ n_out        = 6; % # model output channels
 tMeasCV         = data_cross.tMeas;
 yMeasCV         = data_cross.yMeas;
 t_feed_start_CV = data_cross.t_feed_start;
-t_feed_end_CV   = t_feed_start_CV + feeding_duration_d;
-u_feed_value_CV = data_cross.feed_mass ./ (rho_feed * feeding_duration_d);
+t_feed_end_CV   = t_feed_start_CV + feeding_duration;
+u_feed_value_CV = data_cross.feed_mass ./ (rho_feed * feeding_duration);
 t0_CV           = data_cross.t0;
 tf_CV           = data_cross.tf;
 
@@ -290,7 +270,7 @@ x0_init = [0.049; % S_ac
             0.358; % S_ch4_gas
             0.660];% S_co2_gas
 t_ss     = 500;     % [d] pre-simulation duration for steady-state
-x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, feeding_duration_d);
+x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, feeding_duration);
 
 %% -----------------------------------------------------------------------
 %  4b. LATIN HYPERCUBE SAMPLING -- GLOBAL PRE-SEARCH FOR PI #1
@@ -550,7 +530,7 @@ plotVarianceDecomposition(pi_decomp, p, 'PSS --variance decomposition');
 % is no longer the best initial condition.  Repeat the same two-step
 % procedure with thetaHat1 to obtain x0_2.
 
-x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost, feeding_duration_d);
+x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost, feeding_duration);
 
 % For cross-validation, data_cross immediately follows data_auto in time,
 % so x0_CV is the terminal state of the auto simulation (captured in §6).
