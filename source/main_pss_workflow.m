@@ -52,7 +52,7 @@ model_name       = "ADM1-R3-x1";% model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM
 flag_skip_lhs    = true;        % true → skip LHS pre-search, start PI #1 from theta0
 flag_omit_co2    = true;        % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 are enough
 flag_plot_x0     = false;       % true → open SS + swing-up diagnostic plots from computeX0
-dt_fine = 10/1440;              % [d] fine time-grid resolution for smooth output plots
+dt_fine = 15/1440;              % [d] fine time-grid resolution for smooth output plots
 
 %% -----------------------------------------------------------------------
 %  2. MODEL DEFINITION & NOMINAL PARAMETERS

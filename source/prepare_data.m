@@ -87,6 +87,12 @@ switch dataset
 end
 fprintf("  Loaded.\n");
 
+%% Bundle feeding events
+
+fprintf("Bundling feed events...\n");
+data_raw = bundleFeedings(data_raw, feeding_duration);
+fprintf("  Done.\n");
+
 %% Preprocess (full dataset, before splitting)
 
 fprintf("Preprocessing...\n");

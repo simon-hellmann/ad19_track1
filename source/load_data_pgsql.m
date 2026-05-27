@@ -30,8 +30,7 @@ T_start = datetime('29-Apr-2026 00:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss',
 T_end   = datetime('27-May-2026 12:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss', 'TimeZone','Europe/Berlin');
 
 % feeding event settings
-delta_bundle_min = 15;    % max gap for bundling nearby events [min]
-rho_water        = 1000;  % [kg/m³] density of water feeds; used for xi volume-weighting
+rho_water = 1000;  % [kg/m³] density of water feeds; used for xi volume-weighting
 
 % path to the JSON database config file (relative to this script)
 db_config_file = 'config/db_config.json';
@@ -234,39 +233,9 @@ for i_ev = 1:n_events
     xi_raw_mat(i_ev, :)   = (vol_k' * xi_k) / total_vol_k;            % volume-weighted mix
 end % for
 
-%% Bundle nearby events within delta_bundle_min
-
-% a new group starts whenever the gap to the previous event reaches the threshold;
-% all events within the same group are collapsed into a single feed pulse.
-delta_bundle_days = delta_bundle_min / (24*60);   % [d]
-
-group_id      = ones(n_events, 1);
-current_group = 1;
-for i_ev = 2:n_events
-    if event_times(i_ev) - event_times(i_ev-1) >= delta_bundle_days
-        current_group = current_group + 1;
-    end
-    group_id(i_ev) = current_group;
-end % for
-n_groups = current_group;
-
-t_feed_start_arr = nan(n_groups, 1);
-feed_mass_arr    = nan(n_groups, 1);
-xi_feed_arr      = nan(n_groups, n_xi);
-
-for i_g = 1:n_groups
-    mask_g      = group_id == i_g;
-    vols_g      = vol_raw(mask_g);
-    total_vol_g = sum(vols_g);
-
-    t_feed_start_arr(i_g) = min(event_times(mask_g));
-    feed_mass_arr(i_g)    = sum(mass_raw(mask_g));                             % [kg]
-    xi_feed_arr(i_g, :)   = (vols_g' * xi_raw_mat(mask_g, :)) / total_vol_g;  % volume-weighted
-end % for
-
-data_full.t_feed_start = t_feed_start_arr;
-data_full.feed_mass    = feed_mass_arr;    % [kg]; t_feed_end and u_feed_value derived in main
-data_full.xi_feed      = xi_feed_arr;
+data_full.t_feed_start = event_times;   % one entry per unique timestamp after substrate mixing
+data_full.feed_mass    = mass_raw;      % [kg]
+data_full.xi_feed      = xi_raw_mat;   % volume-weighted inlet composition per timestamp
 
 %% Timing fields
 
@@ -287,8 +256,8 @@ fprintf("\nSample counts per output channel:\n");
 for i = 1:6
     fprintf("  ch %d  %-22s  %4d samples\n", i, output_names{i}, numel(data_full.tMeas{i}));
 end
-fprintf("  feed events: %d bundled from %d raw timestamps (%d substrate entries)\n", ...
-    n_groups, n_events, height(tbl_feedings));
+fprintf("  feed events: %d unique timestamps (%d substrate entries)\n", ...
+    n_events, height(tbl_feedings));
 
 %% Save
 
