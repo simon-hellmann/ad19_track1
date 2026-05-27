@@ -25,8 +25,8 @@ dataProcessedPath = '../data/processed/';
 reactor_id = 1;
 
 % absolute time window of the full dataset (adjust to match the DB records)
-T_start = datetime('01-Jun-2022 00:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss');
-T_end   = datetime('05-Aug-2022 15:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss');
+T_start = datetime('29-Apr-2026 00:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss', 'TimeZone','Europe/Berlin');
+T_end   = datetime('27-May-2026 12:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss', 'TimeZone','Europe/Berlin');
 
 % feeding event settings
 delta_feed_min   = 5;                          % assumed feeding duration [min]
@@ -35,7 +35,7 @@ delta_bundle_min = 15;                         % max gap for bundling nearby eve
 rho_water        = 1000;                       % [kg/m³] density of water feeds
 
 % path to the JSON database config file (relative to this script)
-db_config_file = '../db_config.json';
+db_config_file = 'config/db_config.json';
 
 %% Connect to PostgreSQL
 
@@ -43,16 +43,17 @@ db = jsondecode(fileread(db_config_file)).database;
 
 fprintf("Connecting to '%s' on %s...\n", db.database, db.host);
 try
-    conn = postgresql(db.host, db.database, db.user, db.password, 'Port',db.port);
+    conn = postgresql(db.user, db.password, 'Server',db.host, ...
+        'DatabaseName',db.database, 'PortNumber',db.port);
 catch ME
     error("Database connection failed: %s", ME.message);
 end
 fprintf("Connected.\n");
 
 %% Query online measurements
-
-T_start_str = string(T_start, 'yyyy-MM-dd HH:mm:ss');
-T_end_str   = string(T_end,   'yyyy-MM-dd HH:mm:ss');
+pgsql_time_format = 'yyyy-mm-dd HH:MM:SS'; 
+T_start_str = datestr(T_start, pgsql_time_format);
+T_end_str   = datestr(T_end,   pgsql_time_format);
 
 sql_online = sprintf( ...
     "SELECT time, v_dot_gas, pch4, pco2, ph " + ...
@@ -67,7 +68,7 @@ fprintf("Querying online measurements...\n");
 tbl_online = fetch(conn, sql_online);
 fprintf("  %d rows returned.\n", height(tbl_online));
 
-%% Build tMeas / yMeas from online measurements
+%% Build tMeas / yMeas from online measurements (with NaN handling)
 
 % all online channels share the same time column; NULLs come back as NaN
 t_abs_online = tbl_online.time;                  % datetime column (PostgreSQL TIMESTAMP)
@@ -175,7 +176,7 @@ xi_rhos  = nan(n_bk, 1);     % [kg/m³]
 
 for i_bk = 1:n_bk
     bk = bk_names(i_bk);
-    if bk == "water"
+    if strcmp(bk, "") % water
         sql_xi = "SELECT xi_vector FROM xi_vectors " + ...
                  "ORDER BY time DESC LIMIT 1;";
         tbl_xi        = fetch(conn, sql_xi);
@@ -251,9 +252,9 @@ for i_g = 1:n_groups
     vols_g      = vol_raw(mask_g);
     total_vol_g = sum(vols_g);
 
-    t_feed_start_arr(i_g) = min(event_times(mask_g));
+    t_feed_start_arr(i_g) = min(event_times(mask_g)); % use first feed start time for group
     t_feed_end_arr(i_g)   = t_feed_start_arr(i_g) + delta_feed_days;
-    u_feed_arr(i_g)       = total_vol_g / delta_feed_days;                      % [m³/d]
+    u_feed_arr(i_g)       = total_vol_g / delta_feed_days;                     % [m³/d]
     xi_feed_arr(i_g, :)   = (vols_g' * xi_raw_mat(mask_g, :)) / total_vol_g;   % volume-weighted
 end % for
 
@@ -287,5 +288,5 @@ fprintf("  feed events: %d bundled from %d raw timestamps (%d substrate entries)
 %% Save
 
 fprintf("\nSaving data_full to %s...\n", dataProcessedPath);
-save(fullfile(dataProcessedPath, 'data_full.mat'), 'data_full');
+save(fullfile(dataProcessedPath, 'data_auto_feeder_full.mat'), 'data_full');
 fprintf("Saved: data_full.mat\n");
