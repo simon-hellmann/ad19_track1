@@ -38,9 +38,8 @@ Thumbs.db
 ###########################
 *.tmp
 
-# Logs and databases #
+# Databases #
 ######################
-*.log
 *.sql
 *.sqlite
 
