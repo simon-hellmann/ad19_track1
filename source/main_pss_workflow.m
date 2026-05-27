@@ -105,7 +105,7 @@ phiUB = thetaUB;  phiUB(log_idx) = log10(thetaUB(log_idx));
 % up cost evaluations. NonNegative prevents ode15s driving biological
 % concentration states below zero.
 non_negative_state_idx = 1:14;
-odeOptsOpt  = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
+odeOptsOpt  = odeset('RelTol', 1e-7, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
                      'NonNegative', non_negative_state_idx);
 % Tight tolerances for post-processing (FD sensitivity, CV, plots):
 odeOptsPost = odeset('RelTol', 1e-8, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
@@ -380,7 +380,8 @@ objFun1 = @(phi) costWLS(phi2theta(phi, log_idx), y_meas_long, t_meas_long, out_
 % FD step in phi-space: h ~ ODE_noise^(1/3) balances truncation error O(h^2)
 % against gradient noise O(ODE_noise/h).  All phi ~ O(1) so a uniform absolute
 % step is appropriate; no per-parameter relative scaling needed.  RelTol=1e-7 → h ≈ 4.6e-3.
-fd_stepSize = odeOptsOpt.RelTol^(1/3);  % ≈ 4.6e-3 for RelTol=1e-7
+fd_stepSize = odeOptsOpt.RelTol^(1/3);  % optimal FD step size
+gradient_noise_floor = odeOptsOpt.RelTol/fd_stepSize; 
 opts1 = optimoptions('fmincon', ...
     'Display',                  'iter-detailed', ...
     'Algorithm',                'interior-point', ...
@@ -391,7 +392,7 @@ opts1 = optimoptions('fmincon', ...
     ...                                     % to increase in early iterations (Hessian too coarse)
     'StepTolerance',            1e-10, ...  % MATLAB default: larger values fire SOONER
     ...                                     % (step must shrink BELOW threshold to trigger)
-    'OptimalityTolerance',      1e-3, ...   % ~46x above gradient noise floor (≈2e-5):
+    'OptimalityTolerance',      20*gradient_noise_floor, ...   % above gradient noise floor:
     ...                                     %   only stop when slope is genuinely flat
     'TypicalX',                 ones(n_theta, 1), ...   % phi ~ O(1) for all params
     'MaxFunctionEvaluations',   3000, ...

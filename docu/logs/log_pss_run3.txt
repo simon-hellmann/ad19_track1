@@ -1,0 +1,1084 @@
+flag_omit_co2 = true: p_CO2 removed. 4032 auto-val samples, 2405 CV samples remain.
+LHS skipped — will start PI #1 from theta0.
+J(theta0) = 733.8  (normalization factor)
+Running PI1 with fmincon...
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 10 workers.
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+    0      21    1.000000e+00    0.000e+00    6.644e+00
+    1      44    7.316855e-01    0.000e+00    4.409e+01    6.784e-01
+    2      65    7.460098e-01    0.000e+00    5.097e+00    1.420e-01
+    3      86    6.155149e-01    0.000e+00    3.081e+00    7.318e-02
+    4     107    6.021437e-01    0.000e+00    5.495e-01    2.394e-02
+    5     128    5.969888e-01    0.000e+00    1.131e+00    2.228e-02
+    6     149    5.929092e-01    0.000e+00    1.775e+00    2.300e-02
+    7     170    5.688805e-01    0.000e+00    3.131e+00    1.221e-01
+    8     192    5.493323e-01    0.000e+00    1.843e+00    2.081e-01
+    9     213    5.392245e-01    0.000e+00    1.707e+00    1.333e-01
+   10     234    5.361821e-01    0.000e+00    3.104e+00    5.557e-02
+   11     255    5.251287e-01    0.000e+00    5.131e+00    1.869e-01
+   12     276    5.064346e-01    0.000e+00    6.200e+00    2.479e-01
+   13     297    4.736593e-01    0.000e+00    6.140e+00    2.467e-01
+   14     318    3.953672e-01    0.000e+00    1.273e+00    2.227e-01
+   15     339    3.795618e-01    0.000e+00    3.293e+00    1.139e-01
+   16     360    3.770690e-01    0.000e+00    1.178e+00    1.598e-02
+   17     381    3.751956e-01    0.000e+00    6.791e-01    4.049e-02
+   18     402    3.689145e-01    0.000e+00    2.718e-01    7.695e-02
+   19     423    3.581036e-01    0.000e+00    1.012e+00    1.064e-01
+   20     444    3.487478e-01    0.000e+00    7.612e-01    8.598e-02
+   21     465    3.458670e-01    0.000e+00    1.019e-01    3.046e-02
+   22     486    3.454351e-01    0.000e+00    5.833e-01    2.099e-02
+   23     507    3.459209e-01    0.000e+00    1.102e+00    2.265e-02
+   24     528    3.483022e-01    0.000e+00    2.010e+00    7.258e-02
+   25     549    3.521808e-01    0.000e+00    2.464e+00    1.031e-01
+   26     570    3.561159e-01    0.000e+00    2.064e+00    1.624e-01
+   27     591    3.545007e-01    0.000e+00    1.299e+00    1.050e-01
+   28     613    3.539261e-01    0.000e+00    3.663e-01    3.128e-02
+   29     634    3.516900e-01    0.000e+00    1.571e-01    2.729e-02
+   30     655    3.507859e-01    0.000e+00    1.000e-01    1.190e-02
+
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+   31     676    3.406253e-01    0.000e+00    1.949e-01    1.410e-01
+   32     697    3.347740e-01    0.000e+00    9.276e-02    1.747e-01
+   33     718    3.311734e-01    0.000e+00    3.043e-01    9.511e-02
+   34     739    3.202967e-01    0.000e+00    2.619e-01    3.166e-01
+   35     760    3.172728e-01    0.000e+00    4.149e-01    1.577e-01
+   36     781    3.134643e-01    0.000e+00    4.775e-01    2.483e-01
+   37     802    3.086251e-01    0.000e+00    3.202e-01    3.948e-01
+   38     823    3.041475e-01    0.000e+00    1.940e-01    5.096e-01
+   39     844    3.091749e-01    0.000e+00    1.184e-01    2.281e-01
+   40     865    3.065888e-01    0.000e+00    4.396e-02    8.329e-02
+   41     889    3.065461e-01    0.000e+00    3.052e-02    5.816e-03
+   42     912    3.062826e-01    0.000e+00    1.540e-01    2.634e-02
+   43     933    3.058970e-01    0.000e+00    2.612e-01    1.704e-02
+   44     954    3.049669e-01    0.000e+00    5.594e-01    6.524e-02
+   45     975    3.042881e-01    0.000e+00    6.473e-01    5.705e-02
+   46     996    3.034006e-01    0.000e+00    3.719e-01    6.309e-02
+   47    1017    3.031208e-01    0.000e+00    9.646e-02    3.641e-02
+   48    1038    3.029888e-01    0.000e+00    1.262e-01    6.557e-03
+   49    1059    3.027646e-01    0.000e+00    2.165e-01    1.425e-02
+   50    1080    3.026433e-01    0.000e+00    2.228e-01    1.792e-02
+   51    1101    3.020463e-01    0.000e+00    2.311e-01    4.075e-02
+   52    1122    3.004514e-01    0.000e+00    7.347e-02    1.272e-01
+   53    1143    2.996242e-01    0.000e+00    1.327e-01    4.472e-02
+   54    1164    2.982197e-01    0.000e+00    1.911e-01    8.818e-02
+   55    1185    2.972756e-01    0.000e+00    1.078e-01    4.896e-02
+   56    1206    2.962691e-01    0.000e+00    5.056e-02    4.960e-02
+   57    1227    2.958040e-01    0.000e+00    1.344e-01    2.608e-02
+   58    1248    2.954843e-01    0.000e+00    2.110e-01    3.305e-02
+   59    1270    2.966358e-01    0.000e+00    9.163e-02    5.442e-02
+   60    1291    2.970978e-01    0.000e+00    5.463e-02    2.316e-02
+
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+   61    1320    2.971472e-01    0.000e+00    1.958e-02    2.622e-03
+   62    1343    2.957166e-01    0.000e+00    1.530e+00    1.512e-01
+   63    1364    2.920057e-01    0.000e+00    1.121e+00    1.165e-01
+   64    1385    2.784756e-01    0.000e+00    1.491e-02    4.347e-01
+   65    1408    2.782119e-01    0.000e+00    6.170e-02    5.061e-02
+   66    1429    2.784937e-01    0.000e+00    3.863e-01    1.064e-01
+   67    1450    2.779723e-01    0.000e+00    1.674e-01    4.562e-02
+   68    1471    2.778710e-01    0.000e+00    7.682e-02    6.998e-03
+   69    1493    2.777558e-01    0.000e+00    1.438e-02    7.736e-03
+   70    1515    2.775691e-01    0.000e+00    1.251e-01    1.836e-02
+   71    1542    2.775706e-01    0.000e+00    1.888e-02    2.417e-03
+   72    1566    2.775633e-01    0.000e+00    1.888e-02    5.291e-04
+   73    1587    2.771799e-01    0.000e+00    1.103e-01    4.286e-02
+   74    1608    2.771037e-01    0.000e+00    1.823e-01    7.325e-02
+   75    1629    2.774131e-01    0.000e+00    1.025e-01    4.473e-02
+   76    1650    2.770894e-01    0.000e+00    5.528e-02    3.830e-02
+   77    1671    2.769199e-01    0.000e+00    7.779e-02    3.014e-02
+   78    1692    2.769136e-01    0.000e+00    7.612e-02    1.442e-02
+   79    1713    2.770187e-01    0.000e+00    4.747e-02    3.420e-02
+   80    1742    2.770166e-01    0.000e+00    7.828e-03    8.166e-05
+   81    1763    2.752654e-01    0.000e+00    9.335e-01    1.740e-01
+   82    1785    2.734889e-01    0.000e+00    1.979e-01    1.149e-01
+   83    1806    2.731760e-01    0.000e+00    6.982e-01    7.624e-02
+   84    1828    2.722124e-01    0.000e+00    1.744e-01    6.070e-02
+   85    1849    2.722020e-01    0.000e+00    1.677e-01    4.581e-02
+   86    1870    2.720172e-01    0.000e+00    1.030e-01    9.163e-03
+   87    1891    2.719408e-01    0.000e+00    1.481e-02    1.089e-02
+   88    1912    2.717362e-01    0.000e+00    6.318e-02    2.416e-02
+   89    1933    2.717707e-01    0.000e+00    2.071e-02    7.202e-03
+   90    1954    2.718065e-01    0.000e+00    1.387e-02    8.409e-03
+
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+   91    1975    2.717441e-01    0.000e+00    4.294e-02    3.460e-02
+   92    1996    2.716223e-01    0.000e+00    7.693e-02    5.530e-02
+   93    2017    2.714903e-01    0.000e+00    1.661e-02    3.344e-02
+   94    2038    2.712962e-01    0.000e+00    1.135e-01    6.705e-02
+   95    2060    2.712791e-01    0.000e+00    8.731e-02    1.025e-02
+   96    2081    2.713794e-01    0.000e+00    5.245e-02    2.425e-02
+   97    2102    2.713103e-01    0.000e+00    3.440e-02    1.300e-02
+   98    2123    2.712359e-01    0.000e+00    7.787e-02    1.810e-02
+   99    2144    2.712437e-01    0.000e+00    9.820e-02    4.910e-02
+  100    2165    2.712983e-01    0.000e+00    7.553e-02    3.032e-02
+  101    2186    2.714047e-01    0.000e+00    2.547e-02    7.658e-02
+  102    2207    2.715793e-01    0.000e+00    1.709e-01    1.370e-01
+  103    2228    2.711996e-01    0.000e+00    1.758e-01    2.170e-02
+  104    2249    2.704742e-01    0.000e+00    1.892e-01    1.097e-01
+  105    2272    2.701190e-01    0.000e+00    2.218e-01    8.751e-02
+  106    2293    2.693123e-01    0.000e+00    1.516e-01    7.071e-02
+  107    2314    2.694864e-01    0.000e+00    6.289e-02    2.724e-02
+  108    2338    2.694950e-01    0.000e+00    5.661e-02    1.849e-03
+  109    2370    2.694934e-01    0.000e+00    4.158e-02    6.904e-05
+  110    2404    2.694934e-01    0.000e+00    4.093e-02    1.021e-06
+  111    2426    2.694933e-01    0.000e+00    4.136e-02    6.067e-07
+  112    2454    2.694926e-01    0.000e+00    4.142e-02    5.089e-07
+
+Feasible point with lower objective function value found, but optimality criteria not satisfied. See output.bestfeasible..
+
+
+Optimization stopped because the relative changes in all elements of x are
+less than options.StepTolerance = 1.000000e-10, and the relative maximum constraint
+violation, 0.000000e+00, is less than options.ConstraintTolerance = 1.000000e-06.
+
+Computing FD sensitivities in phi-space (parfor)...
+457 parfor k = 1:n_theta
+Computing FD sensitivities of param 6 of 10...
+Computing FD sensitivities of param 3 of 10...
+Computing FD sensitivities of param 2 of 10...
+Computing FD sensitivities of param 7 of 10...
+Computing FD sensitivities of param 5 of 10...
+Computing FD sensitivities of param 9 of 10...
+Computing FD sensitivities of param 4 of 10...
+Computing FD sensitivities of param 8 of 10...
+Computing FD sensitivities of param 10 of 10...
+Computing FD sensitivities of param 1 of 10...
+Parallel pool using the 'Processes' profile is shutting down.
+511 kappa_max = 500; % maximum condition number
+
+PSS result: 7 / 10 parameters are identifiable.
+Identifiable parameters:
+    {'\Delta S_{ion}'}    {'k_{m,ac}'}    {'k_{ch}'}    {'k_{dec}'}    {'k_{pr}'}    {'K_{S,ac}'}    {'\phi_{IN}'}
+
+Running PI2 with fmincon...
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 10 workers.
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+    0      15    1.513503e+03    0.000e+00    1.562e+02
+Warning: Failure at t=7.447617e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.042234e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=8.339261e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=6.401100e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=6.401099e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=5.396897e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=7.447617e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.138421e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.242940e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=8.339255e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=8.349568e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=9.358682e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=7.447617e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.042234e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.138421e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=7.447617e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.042230e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=8.339255e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=7.447617e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.242939e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.042234e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.242932e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=7.447618e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=7.447617e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+Warning: Failure at t=1.042234e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.042234e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.242933e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+In finDiffEvalAndChkErr
+Warning: Failure at t=8.339255e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.042232e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=7.447618e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=9.358681e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=6.401100e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.042252e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=7.447617e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.138431e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.242940e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=8.339256e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.042234e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=9.358675e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.138417e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.242940e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+    1      30    1.482482e+03    0.000e+00    3.109e+03    1.074e+00
+    2      46    1.428330e+03    0.000e+00    1.884e+02    3.976e-01
+    3      61    1.422764e+03    0.000e+00    1.894e+02    2.653e-02
+    4      76    1.402197e+03    0.000e+00    1.930e+02    9.949e-02
+Warning: Failure at t=6.401103e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=7.447612e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=8.339250e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.138420e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=7.447641e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (1.421085e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=8.341544e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+    5      93    1.398208e+03    0.000e+00    4.627e+02    5.240e-02
+    6     108    1.392692e+03    0.000e+00    2.520e+02    3.762e-02
+    7     123    1.383980e+03    0.000e+00    2.498e+02    3.664e-02
+    8     138    1.343644e+03    0.000e+00    2.236e+02    1.797e-01
+    9     153    1.247556e+03    0.000e+00    7.250e+01    7.703e-01
+   10     169    1.247446e+03    0.000e+00    7.243e+01    1.914e-03
+   11     184    1.247019e+03    0.000e+00    4.556e+01    2.058e-02
+Warning: Failure at t=1.337439e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   12     199    1.246859e+03    0.000e+00    3.753e+01    4.174e-02
+   13     214    1.246791e+03    0.000e+00    4.813e+00    9.011e-03
+   14     229    1.246634e+03    0.000e+00    4.432e+00    1.796e-03
+   15     244    1.246626e+03    0.000e+00    4.728e+00    2.946e-03
+   16     259    1.246607e+03    0.000e+00    4.459e+00    1.369e-02
+Warning: Failure at t=1.337395e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   17     274    1.246524e+03    0.000e+00    3.927e+00    6.275e-02
+Warning: Failure at t=1.337393e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337367e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337420e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337368e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337204e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   18     289    1.246276e+03    0.000e+00    1.797e+01    3.868e-01
+Warning: Failure at t=1.337377e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337197e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337352e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337402e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   19     304    1.246162e+03    0.000e+00    1.677e+01    2.119e-01
+Warning: Failure at t=1.337426e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337426e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337453e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337426e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337426e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337482e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337426e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337426e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337424e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   20     320    1.246109e+03    0.000e+00    2.947e+01    9.420e-02
+Warning: Failure at t=1.337366e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   21     335    1.246079e+03    0.000e+00    7.646e+00    5.049e-03
+   22     350    1.246081e+03    0.000e+00    1.009e+01    1.331e-02
+Warning: Failure at t=1.337346e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   23     365    1.246075e+03    0.000e+00    3.040e+00    1.137e-02
+   24     380    1.245997e+03    0.000e+00    2.392e+00    1.804e-01
+Warning: Failure at t=1.337416e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   25     395    1.245913e+03    0.000e+00    1.839e+01    7.271e-01
+Warning: Failure at t=1.337420e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   26     410    1.245908e+03    0.000e+00    1.781e+01    9.022e-02
+Warning: Failure at t=1.337409e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   27     425    1.245900e+03    0.000e+00    1.778e+01    1.746e-02
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   28     444    1.245877e+03    0.000e+00    7.459e+00    3.243e-02
+Warning: Failure at t=1.337435e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337461e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337440e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337426e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337426e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337447e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337449e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337422e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   29     482    1.245877e+03    0.000e+00    7.460e+00    1.958e-08
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337421e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+   30     500    1.245877e+03    0.000e+00    7.460e+00    3.432e-08
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In objfunEvaluator (line 5)
+In OptimFunctions/objective (line 271)
+In barrier
+In fmincon (line 663)
+In main_pss_workflow (line 578) 
+Warning: Failure at t=1.337447e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337437e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337425e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+Warning: Failure at t=1.337288e+01.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t.
+> In ode15s (line 630)
+In simulateLong (line 54)
+In costWLS (line 47)
+In costWLS_sub (line 11)
+In main_pss_workflow>@(phi_sub)costWLS_sub(phi2theta(phi_sub,keep_log_mask),keep_idx,thetaFixed,y_meas_long,t_meas_long,out_idx,scale_long,t_events,u_segments,xi_segments,x0_2,odeFunc,measFunc,odeOptsOpt,J_penalty)/J0 (line 568)
+In finDiffEvalAndChkErr
+
+                                            First-order      Norm of
+ Iter F-count            f(x)  Feasibility   optimality         step
+   31     529    1.245877e+03    0.000e+00    4.711e-01    7.887e-11
+
+Optimization stopped because the relative changes in all elements of x are
+less than options.StepTolerance = 1.000000e-10, and the relative maximum constraint
+violation, 0.000000e+00, is less than options.ConstraintTolerance = 1.000000e-06.
+
+Computing FD sensitivities in phi-space (parfor)...
+Computing FD sensitivities of param 2 of 7...
+Computing FD sensitivities of param 1 of 7...
+Computing FD sensitivities of param 3 of 7...
+Computing FD sensitivities of param 7 of 7...
+Computing FD sensitivities of param 6 of 7...
+Computing FD sensitivities of param 4 of 7...
+Computing FD sensitivities of param 5 of 7...
+Parallel pool using the 'Processes' profile is shutting down.
+Warning: Matrix is singular to working precision. 
+> In main_pss_workflow (line 631)
+ 
+Warning: Failure at t=9.329932e+00.  Unable to meet integration tolerances without reducing the step size below the smallest value allowed (2.842171e-14) at time t. 
+> In ode15s (line 630)
+In simulateLong (line 54)
+In main_pss_workflow (line 651) 
+
+=== RMSE Summary ===
+Configuration                   Train  |  CV
+PI #1 (full set)                0.2215 | 0.3722
+PI #2 (PSS subset)              15.0580 | 17.7711
+/Users/simonhellmann/Documents/GIT/ad19_track1/data/generated/workspace_run3.mat
+Error using save
+Argument must be a text scalar.
+
+Error in main_pss_workflow (line 683)
+save(fprintf('/Users/simonhellmann/Documents/GIT/ad19_track1/data/generated/workspace_run%i.mat\n', run_id))
+ 
