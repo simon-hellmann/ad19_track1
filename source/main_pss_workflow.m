@@ -68,6 +68,15 @@ switch dataset
         V_gas = 0.004;   % gas headspace volume [m^3]
 end
 
+% --- Output measurement noise standard deviations -----------------------
+% Units: [m^3/d, bar, bar, -, g/L, g/L]
+switch dataset
+    case 'intensiv'
+        sigmaY = [4e-4, 1.78e-2, 2.68e-2, 2e-2, 0.12, 5e-2];
+    case 'automated_feeder'
+        sigmaY = [3e-4, 1e-3, NaN, 5e-3, 0.12, 5e-2]; % reduced pH noise, no CO2 measurement
+end 
+
 % --- Load ADM1 physico-chemical constants --------------------------------
 load('ADM1_parameters.mat', 'parameters');
 parameters_r3 = parameters.ADM1_R3;
@@ -110,10 +119,6 @@ odeOptsOpt  = odeset('RelTol', 1e-7, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
 % Tight tolerances for post-processing (FD sensitivity, CV, plots):
 odeOptsPost = odeset('RelTol', 1e-8, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
                      'NonNegative', non_negative_state_idx);
-
-% --- Output measurement noise standard deviations -----------------------
-% Units: [m^3/d, bar, bar, -, g/L, g/L]
-sigmaY = [4e-4, 1.78e-2, 2.68e-2, 2e-2, 0.12, 5e-2];
 
 % --- LHS pre-screening (only valid if flag_skip_lhs=false) --------------
 N_LHS = 100;
@@ -395,8 +400,8 @@ opts1 = optimoptions('fmincon', ...
     'OptimalityTolerance',      20*gradient_noise_floor, ...   % above gradient noise floor:
     ...                                     %   only stop when slope is genuinely flat
     'TypicalX',                 ones(n_theta, 1), ...   % phi ~ O(1) for all params
-    'MaxFunctionEvaluations',   3000, ...
-    'MaxIterations',            500);
+    'MaxFunctionEvaluations',   5000, ...
+    'MaxIterations',            800);
 
 % --- Run PI #1 (starting from best LHS candidate) -----------------------
 disp("Running PI1 with fmincon...")
@@ -539,10 +544,13 @@ plotVarianceDecomposition(pi_decomp, p, 'PSS --variance decomposition');
 % -----------------------------------------------------------------------
 
 % thetaHat1 may differ substantially from theta0, so x0 from section 4
-% is no longer the best initial condition.  Repeat the same two-step
-% procedure with thetaHat1 to obtain x0_2.
+% is no longer the best initial condition.  Use x0 (PI #1 warm start, on
+% the normal operating branch) with t_ss = 0 to skip the SS pre-simulation.
+% This avoids the sour-SS bifurcation that can occur when the 500 d
+% pre-simulation is run with thetaHat1 under the automated-feeder feed rate.
 
-x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost, feeding_duration, flag_plot_x0, measFunc);
+x0_2 = computeX0(thetaHat1, data_init, 0, x0_CV, odeFunc, odeOptsOpt, ...
+    feeding_duration, flag_plot_x0, measFunc);
 
 % For cross-validation, data_cross immediately follows data_auto in time,
 % so x0_CV is the terminal state of the auto simulation (captured in §6).

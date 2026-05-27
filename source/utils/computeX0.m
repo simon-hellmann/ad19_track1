@@ -1,10 +1,12 @@
 %% computeX0.m
 % Dynamic state initialisation in two steps:
 %
-%   Step 1 -- Steady-state pre-simulation
+%   Step 1 -- Steady-state pre-simulation (skipped when t_ss = 0)
 %     Run the model for t_ss days under constant average feed rate and
 %     volume-weighted average inlet composition.  Drives the state to a
 %     representative operating point regardless of x0_rough.
+%     If measFunc is provided, a sour-SS guard checks pH output 4 < 6.5
+%     after the pre-simulation and falls back to x0_init if triggered.
 %
 %   Step 2 -- Dynamic swing-up over data_init
 %     Simulate piecewise across the data_init window using its actual
@@ -12,7 +14,8 @@
 %     steady state found in step 1.  The terminal state is returned as x0.
 %
 % If flag_plot is true, two diagnostic figures are opened:
-%   Fig 1 -- all state trajectories during SS pre-simulation (2-col grid)
+%   Fig 1 -- all state trajectories during SS pre-simulation (2-col grid,
+%            omitted when t_ss = 0)
 %   Fig 2 -- model output trajectories during swing-up overlaid with
 %            data_init measurements; feed events as red dashed lines
 %
@@ -32,14 +35,17 @@
 %                    .tMeas         -- {n_out x 1} measurement times     [d]
 %                    .yMeas         -- {n_out x 1} measured values
 %                    .t0, .tf       -- window start / end                [d]
-%   t_ss:            SS pre-simulation duration                         [d]
+%   t_ss:            SS pre-simulation duration; 0 skips step 1 and    [d]
+%                   uses x0_init directly as the swing-up warm start
 %   x0_init:         rough initial state (n_states x 1)
 %   odeFunc:         function handle  @(x, u, xi, theta) -> dx/dt
 %   odeOpts:         odeset options struct
 %   feeding_duration: feeding event duration                            [d]
 %   flag_plot:       true → open diagnostic figures (default: false)
 %   measFunc:        function handle  @(x, theta) -> y
-%                    required when flag_plot = true
+%                    required when flag_plot = true; optional when
+%                    t_ss > 0: enables sour-SS guard (pH < 6.5 triggers
+%                    fallback to x0_init)
 
 function x0 = computeX0(theta, data_init, t_ss, x0_init, odeFunc, odeOpts, ...
     feeding_duration, flag_plot, measFunc)
@@ -47,23 +53,43 @@ function x0 = computeX0(theta, data_init, t_ss, x0_init, odeFunc, odeOpts, ...
 if nargin < 8
     flag_plot = false;
 end
-if flag_plot && nargin < 9
+if nargin < 9
+    measFunc = [];
+end
+if flag_plot && isempty(measFunc)
     error('computeX0: measFunc is required when flag_plot = true.');
 end
 
 rho_feed = 1000;   % [kg/m^3] substrate density
+feed_volumes = data_init.feed_mass(:) / rho_feed;   % [m^3] per event
 
 %% Step 1: SS pre-simulation with average feed rate
 
-feed_volumes = data_init.feed_mass(:) / rho_feed;   % [m^3] per event
-total_volume = sum(feed_volumes);
+if t_ss > 0
+    total_volume = sum(feed_volumes);
 
-u_avg  = total_volume / data_init.tf;                             % [m^3/d] avg flow
-xi_avg = (feed_volumes' * data_init.xi_feed)' / total_volume;    % (n_xi x 1) vol-weighted
+    u_avg  = total_volume / data_init.tf;                             % [m^3/d] avg flow
+    xi_avg = (feed_volumes' * data_init.xi_feed)' / total_volume;    % (n_xi x 1) vol-weighted
 
-[t_sol_ss, x_sol_ss] = ode15s(@(t,x) odeFunc(x, u_avg, xi_avg, theta), ...
-                               [0, t_ss], x0_init(:), odeOpts);
-x_ss = x_sol_ss(end,:)';
+    [t_sol_ss, x_sol_ss] = ode15s(@(t,x) odeFunc(x, u_avg, xi_avg, theta), ...
+                                   [0, t_ss], x0_init(:), odeOpts);
+    x_ss = x_sol_ss(end,:)';
+
+    % Sour-SS guard: if pH < 6.5 after pre-simulation, fall back to x0_init
+    if ~isempty(measFunc)
+        y_ss  = measFunc(x_ss, theta);
+        if y_ss(4) < 6.5
+            warning("computeX0: sour SS detected after pre-simulation " + ...
+                    "(pH = %.2f). Falling back to x0_init as warm start.", y_ss(4));
+            x_ss = x0_init(:);
+        end
+    end
+else
+    % t_ss = 0: skip SS pre-simulation, use provided warm start directly
+    t_sol_ss = [];
+    x_sol_ss = [];
+    x_ss     = x0_init(:);
+end
 
 %% Step 2: dynamic swing-up across the data_init window
 
@@ -126,15 +152,17 @@ n_rows_s = ceil(n_states / n_cols);
 n_rows_o = ceil(n_out   / n_cols);
 
 % --- Fig 1: SS pre-simulation (states) -----------------------------------
-figure('Name','computeX0 — SS pre-simulation');
-for i_s = 1:n_states
-    subplot(n_rows_s, n_cols, i_s);
-    plot(t_sol_ss, x_sol_ss(:, i_s));
-    xlabel('t [d]');
-    ylabel(sprintf('x_{%d}', i_s));
-    grid on
-end % for
-sgtitle('SS pre-simulation');
+if ~isempty(x_sol_ss)
+    figure('Name','computeX0 — SS pre-simulation');
+    for i_s = 1:n_states
+        subplot(n_rows_s, n_cols, i_s);
+        plot(t_sol_ss, x_sol_ss(:, i_s));
+        xlabel('t [d]');
+        ylabel(sprintf('x_{%d}', i_s));
+        grid on
+    end % for
+    sgtitle('SS pre-simulation');
+end
 
 % --- Fig 2: swing-up (outputs + measurements) ----------------------------
 figure('Name','computeX0 — dynamic swing-up');
