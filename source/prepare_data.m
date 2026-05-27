@@ -24,7 +24,7 @@ addpath('utils');
 
 %% User settings
 
-dataset = 'intensiv';   % 'intensiv' | 'automated_feeder'
+dataset = 'automated_feeder';   % 'intensiv' | 'automated_feeder'
 
 % --- Preprocessing options (gas channel 1; applied to the full dataset) --
 feeding_duration              = 10/(24*60);  % [d] feeding pulse length
