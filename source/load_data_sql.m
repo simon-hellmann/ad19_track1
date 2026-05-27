@@ -18,7 +18,7 @@ close all
 cd(scriptPath);
 
 addpath('utils');
-dataProcessedPath = '../data/processed/';
+dataProcessedPath = '../data/processed/automated_feeder/';
 
 %% User settings
 
@@ -286,5 +286,5 @@ fprintf("  feed events: %d bundled from %d raw timestamps (%d substrate entries)
 %% Save
 
 fprintf("\nSaving data_full to %s...\n", dataProcessedPath);
-save(fullfile(dataProcessedPath, 'data_auto_feeder_full.mat'), 'data_full');
+save(fullfile(dataProcessedPath, 'data_full.mat'), 'data_full');
 fprintf("Saved: data_full.mat\n");
