@@ -29,10 +29,8 @@ T_start = datetime('29-Apr-2026 00:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss',
 T_end   = datetime('27-May-2026 12:00:00', 'InputFormat','dd-MMM-yyyy HH:mm:ss', 'TimeZone','Europe/Berlin');
 
 % feeding event settings
-delta_feed_min   = 5;                          % assumed feeding duration [min]
-delta_feed_days  = delta_feed_min  / (24*60);  % [d]
-delta_bundle_min = 15;                         % max gap for bundling nearby events [min]
-rho_water        = 1000;                       % [kg/m³] density of water feeds
+delta_bundle_min = 15;    % max gap for bundling nearby events [min]
+rho_water        = 1000;  % [kg/m³] density of water feeds; used for xi volume-weighting
 
 % path to the JSON database config file (relative to this script)
 db_config_file = 'config/db_config.json';
@@ -102,7 +100,8 @@ data_full.yMeas{4} = tbl_online.ph(mask_ph);
 %% Query offline measurements — channel 5: S_IN (type = 'NH4-N')
 
 % sample time (om.time) is used for tMeas — this is when the reactor state was observed.
-% if a measurement has multiple return entries, only the first (lowest omr.id) is taken.
+% if a measurement has multiple return entries, the latest (highest omr.id) is taken
+% to pick up re-processed values over the original ones.
 sql_sin = sprintf( ...
     "SELECT DISTINCT ON (om.id) om.time, omr.value " + ...
     "FROM public.offline_measurements om " + ...
@@ -112,7 +111,7 @@ sql_sin = sprintf( ...
     "  AND om.flag_valid != 0 " + ...
     "  AND om.time >= '%s' " + ...
     "  AND om.time <= '%s' " + ...
-    "ORDER BY om.id, omr.id;", ...
+    "ORDER BY om.id, omr.id DESC;", ...
     reactor_id, T_start_str, T_end_str);
 
 fprintf("Querying offline S_IN (NH4-N) measurements...\n");
@@ -134,7 +133,7 @@ sql_sac = sprintf( ...
     "  AND om.flag_valid != 0 " + ...
     "  AND om.time >= '%s' " + ...
     "  AND om.time <= '%s' " + ...
-    "ORDER BY om.id, omr.id;", ...
+    "ORDER BY om.id, omr.id DESC;", ...
     reactor_id, T_start_str, T_end_str);
 
 fprintf("Querying offline S_ac (GC) measurements...\n");
@@ -206,7 +205,8 @@ n_events    = numel(event_times);
 n_xi        = numel(xi_vecs{1});
 
 % intermediate arrays: one entry per unique raw timestamp
-vol_raw    = nan(n_events, 1);     % [m³] total volume
+mass_raw   = nan(n_events, 1);     % [kg] total mass fed
+vol_raw    = nan(n_events, 1);     % [m³] total volume (for xi volume-weighting only)
 xi_raw_mat = nan(n_events, n_xi);  % volume-weighted xi
 
 for i_ev = 1:n_events
@@ -219,11 +219,12 @@ for i_ev = 1:n_events
     rho_k       = xi_rhos(xi_idx);             % (n_subs x 1) [kg/m³]
     xi_k        = cell2mat(xi_vecs(xi_idx));   % (n_subs x n_xi)
 
-    vol_k           = amount_k ./ rho_k;       % [m³] per substrate
-    total_vol_k     = sum(vol_k);              % [m³] total
+    vol_k       = amount_k ./ rho_k;           % [m³] per substrate
+    total_vol_k = sum(vol_k);                  % [m³] total
 
-    vol_raw(i_ev)       = total_vol_k;
-    xi_raw_mat(i_ev, :) = (vol_k' * xi_k) / total_vol_k;   % volume-weighted mix
+    mass_raw(i_ev)        = sum(amount_k);                             % [kg]
+    vol_raw(i_ev)         = total_vol_k;
+    xi_raw_mat(i_ev, :)   = (vol_k' * xi_k) / total_vol_k;            % volume-weighted mix
 end % for
 
 %% Bundle nearby events within delta_bundle_min
@@ -243,8 +244,7 @@ end % for
 n_groups = current_group;
 
 t_feed_start_arr = nan(n_groups, 1);
-t_feed_end_arr   = nan(n_groups, 1);
-u_feed_arr       = nan(n_groups, 1);
+feed_mass_arr    = nan(n_groups, 1);
 xi_feed_arr      = nan(n_groups, n_xi);
 
 for i_g = 1:n_groups
@@ -252,15 +252,13 @@ for i_g = 1:n_groups
     vols_g      = vol_raw(mask_g);
     total_vol_g = sum(vols_g);
 
-    t_feed_start_arr(i_g) = min(event_times(mask_g)); % use first feed start time for group
-    t_feed_end_arr(i_g)   = t_feed_start_arr(i_g) + delta_feed_days;
-    u_feed_arr(i_g)       = total_vol_g / delta_feed_days;                     % [m³/d]
-    xi_feed_arr(i_g, :)   = (vols_g' * xi_raw_mat(mask_g, :)) / total_vol_g;   % volume-weighted
+    t_feed_start_arr(i_g) = min(event_times(mask_g));
+    feed_mass_arr(i_g)    = sum(mass_raw(mask_g));                             % [kg]
+    xi_feed_arr(i_g, :)   = (vols_g' * xi_raw_mat(mask_g, :)) / total_vol_g;  % volume-weighted
 end % for
 
 data_full.t_feed_start = t_feed_start_arr;
-data_full.t_feed_end   = t_feed_end_arr;
-data_full.u_feed_value = u_feed_arr;
+data_full.feed_mass    = feed_mass_arr;    % [kg]; t_feed_end and u_feed_value derived in main
 data_full.xi_feed      = xi_feed_arr;
 
 %% Timing fields

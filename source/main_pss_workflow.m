@@ -35,6 +35,8 @@ clear; clc; close all;
 %  1. SETUP & PATHS
 % -----------------------------------------------------------------------
 
+run_id = 2; 
+
 % add subfolders (model files, helper functions, PSS routine, etc.)
 addpath('model_files');
 addpath('utils');  
@@ -684,3 +686,6 @@ fprintf('\n=== RMSE Summary ===\n');
 fprintf('%-30s  Train  |  CV\n', 'Configuration');
 fprintf('%-30s  %.4f | %.4f\n', 'PI #1 (full set)',     RMSE1_auto, RMSE1_cv);
 fprintf('%-30s  %.4f | %.4f\n', 'PI #2 (PSS subset)',   RMSE2_auto, RMSE2_cv);
+
+% save workspace: 
+save(fprintf('/Users/simonhellmann/Documents/GIT/ad19_track1/data/generated/workspace_run%i.mat', run_id))
