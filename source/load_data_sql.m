@@ -49,9 +49,12 @@ end
 fprintf("Connected.\n");
 
 %% Query online measurements
-pgsql_time_format = 'yyyy-mm-dd HH:MM:SS'; 
-T_start_str = datestr(T_start, pgsql_time_format);
-T_end_str   = datestr(T_end,   pgsql_time_format);
+
+% Include UTC offset in the SQL strings so PostgreSQL treats the bounds as
+% TIMESTAMPTZ literals and compares them in the correct timezone (no DST
+% ambiguity).  'Z' in MATLAB datetime format gives the offset, e.g. +0200.
+T_start_str = string(T_start, "yyyy-MM-dd HH:mm:ss Z");
+T_end_str   = string(T_end,   "yyyy-MM-dd HH:mm:ss Z");
 
 sql_online = sprintf( ...
     "SELECT time, v_dot_gas, pch4, pco2, ph " + ...
@@ -68,8 +71,11 @@ fprintf("  %d rows returned.\n", height(tbl_online));
 
 %% Build tMeas / yMeas from online measurements (with NaN handling)
 
-% all online channels share the same time column; NULLs come back as NaN
-t_abs_online = tbl_online.time;                  % datetime column (PostgreSQL TIMESTAMP)
+% all online channels share the same time column; NULLs come back as NaN.
+% MATLAB returns TIMESTAMPTZ columns as timezone-aware datetime objects;
+% subtracting T_start (also timezone-aware) gives correct relative times
+% across DST transitions.
+t_abs_online = tbl_online.time;                  % datetime (TIMESTAMPTZ, timezone-aware)
 t_rel_online = days(t_abs_online - T_start);     % [d] relative to T_start
 
 data_full.tMeas = cell(6, 1);
@@ -196,8 +202,8 @@ end % for
 
 %% Mix substrates at each unique event timestamp
 
-t_abs_feedings = tbl_feedings.time;
-t_rel_feedings = days(t_abs_feedings - T_start);   % [d] relative to T_start
+t_abs_feedings = tbl_feedings.time;                   % datetime (TIMESTAMPTZ, timezone-aware)
+t_rel_feedings = days(t_abs_feedings - T_start);      % [d] relative to T_start
 bk_feedings    = string(tbl_feedings.bk_number);
 
 event_times = unique(t_rel_feedings);
