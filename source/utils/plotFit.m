@@ -23,7 +23,7 @@
 %   titleStr:       figure title string
 %
 
-function plotFit(t_meas_long, y_meas_long, y_sim_long, out_idx, p, ...
+function plotFit(t_meas_long, y_meas_long, t_fine, y_fine, out_idx, p, ...
     t_events, u_segments, titleStr)
 
 n_rows = p.nOutputs + 1;
@@ -31,21 +31,21 @@ n_rows = p.nOutputs + 1;
 figure('Name',titleStr, 'NumberTitle','off');
 plotFeed(subplot(n_rows, 1, 1), t_events, u_segments);
 
-for i = 1:p.nOutputs
-    mask = (out_idx == i);
+for out_k = 1:p.nOutputs
+    mask = (out_idx == out_k);
     if ~any(mask); continue; end
 
-    subplot(n_rows, 1, i + 1);
+    subplot(n_rows, 1, out_k + 1);
     hold on; box on; grid on;
 
     plot(t_meas_long(mask), y_meas_long(mask), 'o', ...
          'MarkerSize',4, 'DisplayName','Measured');
-    plot(t_meas_long(mask), y_sim_long(mask), '-', ...
+    plot(t_fine, y_fine(:,out_k), '-', ...
          'LineWidth',1.5, 'DisplayName','Simulated');
 
-    ylabel([p.outputNames{i}, ' [', p.outputUnits{i}, ']']);
+    ylabel([p.outputNames{out_k}, ' [', p.outputUnits{out_k}, ']']);
     xlim([t_events(1), t_events(end)]);
-    if i == 1
+    if out_k == 1
         legend('Location','best');
     end
 end

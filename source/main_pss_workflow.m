@@ -38,6 +38,7 @@ clear; clc; close all;
 % add subfolders (model files, helper functions, PSS routine, etc.)
 addpath('model_files');
 addpath('utils');  
+addpath('model_files/model_data');
 
 % random seed for reproducibility (only matters if using stochastic optimiser)
 rng(42);
@@ -57,7 +58,6 @@ V_liq = 0.012;   % liquid volume [m^3]
 V_gas = 0.003;   % gas headspace volume [m^3]
 
 % --- Load ADM1 physico-chemical constants --------------------------------
-addpath('model_files/model_data');
 load('ADM1_parameters.mat', 'parameters');
 parameters_r3 = parameters.ADM1_R3;
 
@@ -117,6 +117,8 @@ prepOpts.dt_IN_after        = 30 / 1440;   % [d]
 prepOpts.dt_AC_before       = 30 / 1440;   % [d]
 prepOpts.dt_AC_after        = 30 / 1440;   % [d]
 prepOpts.q_gas_min          = 3  / 1000;   % [m^3/d] — measurements below this are always excluded
+
+dt_fine = 10/1440;   % [d] = 10 min, fine time-grid resolution for smooth output plots
 
 %% -----------------------------------------------------------------------
 %  3. LOAD & PREPROCESS DATASETS
@@ -212,9 +214,9 @@ n_xi        = size(data_auto.xi_feed, 2);
 u_segments  = zeros(numel(t_events)-1, 1);
 xi_segments = zeros(numel(t_events)-1, n_xi);
 for event_k = 1:numel(t_feed_start)
-    active              = (t_mid >= t_feed_start(event_k)) & (t_mid <= t_feed_end(event_k));
-    u_segments(active)  = u_feed_value(event_k);
-    xi_segments(active,:) = repmat(data_auto.xi_feed(event_k,:), sum(active), 1);
+    mask_active = (t_mid >= t_feed_start(event_k)) & (t_mid <= t_feed_end(event_k));
+    u_segments(mask_active) = u_feed_value(event_k);
+    xi_segments(mask_active,:) = repmat(data_auto.xi_feed(event_k,:), sum(mask_active), 1);
 end
 
 % --- Build the long observation vector for cross-validation -------------
@@ -243,9 +245,9 @@ t_mid_CV     = (t_events_CV(1:end-1) + t_events_CV(2:end)) / 2;
 u_segments_CV  = zeros(numel(t_events_CV)-1, 1);
 xi_segments_CV = zeros(numel(t_events_CV)-1, n_xi);
 for event_k = 1:numel(t_feed_start_CV)
-    active = (t_mid_CV >= t_feed_start_CV(event_k)) & (t_mid_CV <= t_feed_end_CV(event_k));
-    u_segments_CV(active)   = u_feed_value_CV(event_k);
-    xi_segments_CV(active,:) = repmat(data_cross.xi_feed(event_k,:), sum(active), 1);
+    mask_active = (t_mid_CV >= t_feed_start_CV(event_k)) & (t_mid_CV <= t_feed_end_CV(event_k));
+    u_segments_CV(mask_active)   = u_feed_value_CV(event_k);
+    xi_segments_CV(mask_active,:) = repmat(data_cross.xi_feed(event_k,:), sum(mask_active), 1);
 end
 
 % --- Optionally drop p_CO2 (output 3) from both PI datasets --------------
@@ -372,14 +374,18 @@ phi0(log_idx) = log10(theta0(log_idx));
 % Dividing by J0 brings the cost to O(1) at the start, which keeps the
 % gradient components in a numerically tractable range for fmincon's FD.
 % The optimum location is unchanged; only the gradient magnitude is rescaled.
-[J0, J_ch0, r_scaled_cell0, y_sim0] = costWLS(theta0, y_meas_long, ...
+[J0, J_ch0, r_scaled_cell0] = costWLS(theta0, y_meas_long, ...
         t_meas_long, out_idx, scale_long, t_events, u_segments, ...
         xi_segments, x0, odeFunc, measFunc, odeOptsOpt, J_penalty);
 fprintf('J(theta0) = %.4g  (normalization factor)\n', J0);
 
+[~, ~, t_fine0, ~, y_fine0] = simulateLong(theta0, t_meas_long, out_idx, t_events, ...
+    u_segments, xi_segments, x0, odeFunc, measFunc, odeOptsPost, dt_fine);
+
 plotCostChannels(J_ch0, p, 'Cost channels at init param theta0')
 plotResidualBoxplot(r_scaled_cell0, p, 'Scaled residual at init param theta0')
-plotFit(t_meas_long, y_meas_long, y_sim0, out_idx, p, t_events, u_segments, 'Fit at init param theta0')
+plotFit(t_meas_long, y_meas_long, t_fine0, y_fine0, out_idx, p, t_events, ...
+    u_segments, 'Fit at init param theta0')
 
 %% -----------------------------------------------------------------------
 %  5. PI #1 -- MAX LIKELIHOOD ESTIMATION ON FULL PARAMETER VECTOR (fmincon)
@@ -430,11 +436,11 @@ thetaHat1 = phi2theta(phiHat1, log_idx);   % convert phi-space result to physica
 % ---- 5a. Simulate with thetaHat1 and compute fit quality ---------------
 % ySimLong1 has the same row ordering as y_meas_long (time-sorted).
 
-[ySimLong1, x0_CV] = simulateLong(thetaHat1, t_meas_long, out_idx, t_events, ...
-                         u_segments, xi_segments, x0, odeFunc, measFunc, odeOptsPost);
-r_scaled1   = (ySimLong1 - y_meas_long) ./ scale_long; % scaled residuals
+[ySimLong1, x0_CV, t_fine1, ~, y_fine1] = simulateLong(thetaHat1, t_meas_long, out_idx, ...
+    t_events, u_segments, xi_segments, x0, odeFunc, measFunc, odeOptsPost, dt_fine);
+r_scaled1  = (ySimLong1 - y_meas_long) ./ scale_long;
 RMSE1_auto = sqrt(mean(r_scaled1.^2));
-plotFit(t_meas_long, y_meas_long, ySimLong1, out_idx, p, t_events, u_segments, 'PI #1 --autovalidation fit');
+plotFit(t_meas_long, y_meas_long, t_fine1, y_fine1, out_idx, p, t_events, u_segments, 'PI #1 --autovalidation fit');
 
 [J1, J_ch1, r_scaled_cell1] = costWLS(thetaHat1, y_meas_long, ...
         t_meas_long, out_idx, scale_long, t_events, u_segments, ...
@@ -507,11 +513,11 @@ std_theta1(lin_idx)    = std_phi1(lin_idx);
 plotUncertainty(thetaHat1, std_theta1, p, 'PI #1 --parameter uncertainty');
 
 % ---- 5c. Cross-validation with independent dataset ---------------------
-ySimLong1_CV = simulateLong(thetaHat1, t_meas_long_CV, out_idx_CV, ...
-                   t_events_CV, u_segments_CV, xi_segments_CV, x0_CV, odeFunc, measFunc, odeOptsPost);
+[ySimLong1_CV, ~, t_fine1_CV, ~, y_fine1_CV] = simulateLong(thetaHat1, t_meas_long_CV, ...
+    out_idx_CV, t_events_CV, u_segments_CV, xi_segments_CV, x0_CV, odeFunc, measFunc, odeOptsPost, dt_fine);
 r_scaled1_CV = (ySimLong1_CV - y_meas_long_CV) ./ scale_long_CV;
 RMSE1_cv     = sqrt(mean(r_scaled1_CV.^2));
-plotFit(t_meas_long_CV, y_meas_long_CV, ySimLong1_CV, out_idx_CV, p, ...
+plotFit(t_meas_long_CV, y_meas_long_CV, t_fine1_CV, y_fine1_CV, out_idx_CV, p, ...
     t_events_CV, u_segments_CV, 'PI #1 --cross-validation');
 
 %% -----------------------------------------------------------------------
@@ -603,11 +609,11 @@ thetaHat2(keep_idx) = thetaSub2;
 % -----------------------------------------------------------------------
 
 % ---- 10a. Fit quality ---------------------------------------------------
-[ySimLong2, x0_CV_2] = simulateLong(thetaHat2, t_meas_long, out_idx, t_events, ...
-                           u_segments, xi_segments, x0_2, odeFunc, measFunc, odeOptsPost);
-r_scaled2   = (ySimLong2 - y_meas_long) ./ scale_long;
+[ySimLong2, x0_CV_2, t_fine2, ~, y_fine2] = simulateLong(thetaHat2, t_meas_long, out_idx, ...
+    t_events, u_segments, xi_segments, x0_2, odeFunc, measFunc, odeOptsPost, dt_fine);
+r_scaled2  = (ySimLong2 - y_meas_long) ./ scale_long;
 RMSE2_auto = sqrt(mean(r_scaled2.^2));
-plotFit(t_meas_long, y_meas_long, ySimLong2, out_idx, p, t_events, u_segments, 'PI #2 --autovalidation fit');
+plotFit(t_meas_long, y_meas_long, t_fine2, y_fine2, out_idx, p, t_events, u_segments, 'PI #2 --autovalidation fit');
 
 % ---- 10b. Scaled output sensitivity in phi-space for the identifiable subset --
 % Same structure as §6b, columns restricted to keep_idx.
@@ -662,11 +668,11 @@ plotUncertainty(thetaHat2, std_theta2_full, p, ...
                 'PI #2 --parameter uncertainty (identifiable subset)');
 
 % ---- 10c. Cross-validation ----------------------------------------------
-ySimLong2_CV = simulateLong(thetaHat2, t_meas_long_CV, out_idx_CV, ...
-                   t_events_CV, u_segments_CV, xi_segments_CV, x0_CV_2, odeFunc, measFunc, odeOptsPost);
+[ySimLong2_CV, ~, t_fine2_CV, ~, y_fine2_CV] = simulateLong(thetaHat2, t_meas_long_CV, ...
+    out_idx_CV, t_events_CV, u_segments_CV, xi_segments_CV, x0_CV_2, odeFunc, measFunc, odeOptsPost, dt_fine);
 r_scaled2_CV = (ySimLong2_CV - y_meas_long_CV) ./ scale_long_CV;
 RMSE2_cv     = sqrt(mean(r_scaled2_CV.^2));
-plotFit(t_meas_long_CV, y_meas_long_CV, ySimLong2_CV, out_idx_CV, p, ...
+plotFit(t_meas_long_CV, y_meas_long_CV, t_fine2_CV, y_fine2_CV, out_idx_CV, p, ...
     t_events_CV, u_segments_CV, 'PI #2 --cross-validation');
 
 %% -----------------------------------------------------------------------
@@ -675,9 +681,9 @@ plotFit(t_meas_long_CV, y_meas_long_CV, ySimLong2_CV, out_idx_CV, p, ...
 
 % ---- 11a. Fit overlay (autovalidation + CV) -----------------------------------
 % Show that ySimLong1 ~= ySimLong2 (fit quality preserved after PSS)
-plotFitComparison(t_meas_long, y_meas_long, ySimLong1, ySimLong2, out_idx, p, ...
+plotFitComparison(t_meas_long, y_meas_long, t_fine1, y_fine1, y_fine2, out_idx, p, ...
     t_events, u_segments, 'Fit comparison: PI #1 vs PI #2 (autovalidation)');
-plotFitComparison(t_meas_long_CV, y_meas_long_CV, ySimLong1_CV, ySimLong2_CV, ...
+plotFitComparison(t_meas_long_CV, y_meas_long_CV, t_fine1_CV, y_fine1_CV, y_fine2_CV, ...
     out_idx_CV, p, t_events_CV, u_segments_CV, 'Fit comparison: PI #1 vs PI #2 (cross-validation)');
 
 % ---- 11b. Confidence interval shrinkage ---------------------------------

@@ -1,6 +1,6 @@
 %% plotFitComparison.m
-% Overlay PI #1 and PI #2 simulations against measurements, with feed rate on top.
-% Shows that fit quality is preserved after PSS.
+% Overlay PI #1 and PI #2 smooth simulations against measurements,
+% with feed rate on top. Shows that fit quality is preserved after PSS.
 %
 % Author: Simon Hellmann. Created: 2026/05/17. Version: Matlab R2022b, Update 6
 %
@@ -12,8 +12,9 @@
 %
 %   t_meas_long:    (N_long x 1) measurement times, long vector        [d]
 %   y_meas_long:    (N_long x 1) measured values, long vector
-%   y_sim_long1:    (N_long x 1) PI #1 simulated values
-%   y_sim_long2:    (N_long x 1) PI #2 simulated values
+%   t_fine:         (n_fine x 1) equidistant fine time grid            [d]
+%   y_fine1:        (n_fine x n_out) PI #1 simulated outputs on t_fine
+%   y_fine2:        (n_fine x n_out) PI #2 simulated outputs on t_fine
 %   out_idx:        (N_long x 1) output channel index per entry        [1..n_out]
 %   p:              metadata struct. Fields used:
 %                   .nOutputs     number of output channels
@@ -24,7 +25,7 @@
 %   titleStr:       figure title string
 %
 
-function plotFitComparison(t_meas_long, y_meas_long, y_sim_long1, y_sim_long2, ...
+function plotFitComparison(t_meas_long, y_meas_long, t_fine, y_fine1, y_fine2, ...
     out_idx, p, t_events, u_segments, titleStr)
 
 n_rows = p.nOutputs + 1;
@@ -41,9 +42,9 @@ for i = 1:p.nOutputs
 
     plot(t_meas_long(mask), y_meas_long(mask), 'ko', ...
          'MarkerSize',4, 'DisplayName','Measured');
-    plot(t_meas_long(mask), y_sim_long1(mask), 'b-', ...
+    plot(t_fine, y_fine1(:,i), 'b-', ...
          'LineWidth',1.5, 'DisplayName','PI #1 (full set)');
-    plot(t_meas_long(mask), y_sim_long2(mask), 'r--', ...
+    plot(t_fine, y_fine2(:,i), 'r--', ...
          'LineWidth',1.5, 'DisplayName','PI #2 (PSS subset)');
 
     ylabel([p.outputNames{i}, ' [', p.outputUnits{i}, ']']);
