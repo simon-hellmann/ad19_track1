@@ -51,7 +51,7 @@ dataset          = 'automated_feeder';  % 'intensiv' | 'automated_feeder'
 model_name       = "ADM1-R3-x1";% model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM1-R3-x2"
 flag_skip_lhs    = true;        % true → skip LHS pre-search, start PI #1 from theta0
 flag_omit_co2    = true;        % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 are enough
-flag_plot_x0     = false;       % true → open SS + swing-up diagnostic plots from computeX0
+flag_plot_x0     = true;       % true → open SS + swing-up diagnostic plots from computeX0
 dt_fine = 15/1440;              % [d] fine time-grid resolution for smooth output plots
 
 %% -----------------------------------------------------------------------
@@ -281,7 +281,8 @@ x0_init = [0.049; % S_ac
             0.358; % S_ch4_gas
             0.660];% S_co2_gas
 t_ss     = 500;     % [d] pre-simulation duration for steady-state
-x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, feeding_duration, flag_plot_x0);
+x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, ...
+    feeding_duration, flag_plot_x0, measFunc);
 
 %% -----------------------------------------------------------------------
 %  4b. LATIN HYPERCUBE SAMPLING -- GLOBAL PRE-SEARCH FOR PI #1
@@ -540,7 +541,7 @@ plotVarianceDecomposition(pi_decomp, p, 'PSS --variance decomposition');
 % is no longer the best initial condition.  Repeat the same two-step
 % procedure with thetaHat1 to obtain x0_2.
 
-x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost, feeding_duration, flag_plot_x0);
+x0_2 = computeX0(thetaHat1, data_init, t_ss, x0_init, odeFunc, odeOptsPost, feeding_duration, flag_plot_x0, measFunc);
 
 % For cross-validation, data_cross immediately follows data_auto in time,
 % so x0_CV is the terminal state of the auto simulation (captured in §6).
