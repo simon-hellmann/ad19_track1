@@ -63,7 +63,7 @@ switch dataset
         preproc_opts.flag_filter_AC   = false;   % true: remove gas data around AC samples
         preproc_opts.q_gas_min        = 0.002;  % [m³/d] below this: exclude
     otherwise
-        error('prepare_data: unknown dataset ''%s''.', dataset);
+        error("prepare_data: unknown dataset '%s'.", dataset);
 end
 
 %% Paths  (derived from dataset flag — no hardcoded names beyond here)
@@ -119,26 +119,26 @@ fprintf("  Cross: %2d feed events, abs. t = [%5.1f, %5.1f] d\n", ...
 
 %% Sanity checks
 
-output_names = {'gasflow','p_CH4','p_CO2','pH','S_IN','S_ac'};
+output_names = {"gasflow","p_CH4","p_CO2","pH","S_IN","S_ac"};
 for i_ds = 1:3
     switch i_ds
-        case 1; d = data_init;  label = 'init';
-        case 2; d = data_auto;  label = 'auto';
-        case 3; d = data_cross; label = 'cross';
+        case 1; d = data_init;  label = "init";
+        case 2; d = data_auto;  label = "auto";
+        case 3; d = data_cross; label = "cross";
     end
     for i_ch = 1:6
         if isempty(d.tMeas{i_ch})
-            warning('prepare_data: output %s has NO measurements in %s window.', ...
+            warning("prepare_data: output %s has NO measurements in %s window.", ...
                 output_names{i_ch}, label);
         end
     end
 end
 
 if T_init_end > T_auto_start
-    warning('prepare_data: init and auto windows overlap.');
+    warning("prepare_data: init and auto windows overlap.");
 end
 if T_auto_end > T_cross_start
-    warning('prepare_data: auto and cross windows overlap.');
+    warning("prepare_data: auto and cross windows overlap.");
 end
 
 %% Save

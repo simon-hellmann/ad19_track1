@@ -27,10 +27,9 @@
 %   into a physically realistic one; the final state of that simulation
 %   becomes the initial condition for the autovalidation (and CV) windows.
 %
-% Author: Simon Hellmann
-% Created: 2026-05-17
+% Author: Simon Hellmann. Created: 2026/05/17. Version: Matlab R2022b, Update 6
 
-clear; clc; close all;
+clc; clear; close all
 
 %% -----------------------------------------------------------------------
 %  1. SETUP & PATHS
@@ -48,7 +47,7 @@ rng(42);
 
 % --- Workflow flags -------------------------------------------------------
 dataset          = 'automated_feeder';  % 'intensiv' | 'automated_feeder'
-model_name       = "ADM1-R3-x1";% model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM1-R3-x2"
+model_name       = "ADM1-R3-x1"; % model variant: "ADM1-R3" | "ADM1-R3-x1" | "ADM1-R3-x2"
 flag_skip_lhs    = true;        % true → skip LHS pre-search, start PI #1 from theta0
 flag_omit_co2    = true;        % true → drop p_CO2 (output 3) from PI; q_gas + p_CH4 are enough
 flag_plot_x0     = true;       % true → open SS + swing-up diagnostic plots from computeX0
@@ -114,11 +113,11 @@ phiUB = thetaUB;  phiUB(log_idx) = log10(thetaUB(log_idx));
 % up cost evaluations. NonNegative prevents ode15s driving biological
 % concentration states below zero.
 non_negative_state_idx = 1:14;
-odeOptsOpt  = odeset('RelTol', 1e-7, 'AbsTol', 1e-8, 'MaxStep', 0.5/24, ...
-                     'NonNegative', non_negative_state_idx);
+odeOptsOpt  = odeset('RelTol',1e-7, 'AbsTol',1e-8, 'MaxStep',0.5/24, ...
+                     'NonNegative',non_negative_state_idx);
 % Tight tolerances for post-processing (FD sensitivity, CV, plots):
-odeOptsPost = odeset('RelTol', 1e-8, 'AbsTol', 1e-9, 'MaxStep', 0.5/24, ...
-                     'NonNegative', non_negative_state_idx);
+odeOptsPost = odeset('RelTol',1e-8, 'AbsTol',1e-9, 'MaxStep',0.5/24, ...
+                     'NonNegative',non_negative_state_idx);
 
 % --- LHS pre-screening (only valid if flag_skip_lhs=false) --------------
 N_LHS = 100;
@@ -388,20 +387,20 @@ objFun1 = @(phi) costWLS(phi2theta(phi, log_idx), y_meas_long, t_meas_long, out_
 fd_stepSize = odeOptsOpt.RelTol^(1/3);  % optimal FD step size
 gradient_noise_floor = odeOptsOpt.RelTol/fd_stepSize; 
 opts1 = optimoptions('fmincon', ...
-    'Display',                  'iter-detailed', ...
-    'Algorithm',                'interior-point', ...
-    'UseParallel',              true, ...
-    'FiniteDifferenceType',     'central', ...
-    'FiniteDifferenceStepSize', fd_stepSize, ...
-    'HessianApproximation',     'lbfgs', ...    % default 10-pair memory; 4 pairs caused cost
-    ...                                     % to increase in early iterations (Hessian too coarse)
-    'StepTolerance',            1e-10, ...  % MATLAB default: larger values fire SOONER
-    ...                                     % (step must shrink BELOW threshold to trigger)
-    'OptimalityTolerance',      20*gradient_noise_floor, ...   % above gradient noise floor:
-    ...                                     %   only stop when slope is genuinely flat
-    'TypicalX',                 ones(n_theta, 1), ...   % phi ~ O(1) for all params
-    'MaxFunctionEvaluations',   1000, ...
-    'MaxIterations',            100);
+    'Display','iter-detailed', ...
+    'Algorithm','interior-point', ...
+    'UseParallel',true, ...
+    'FiniteDifferenceType','central', ...
+    'FiniteDifferenceStepSize',fd_stepSize, ...
+    'HessianApproximation','lbfgs', ...    % default 10-pair memory; 4 pairs caused cost
+    ...                                    % to increase in early iterations (Hessian too coarse)
+    'StepTolerance',1e-10, ...  % MATLAB default: larger values fire SOONER
+    ...                         % (step must shrink BELOW threshold to trigger)
+    'OptimalityTolerance',20*gradient_noise_floor, ...   % above gradient noise floor:
+    ...                                    %   only stop when slope is genuinely flat
+    'TypicalX',ones(n_theta, 1), ...   % phi ~ O(1) for all params
+    'MaxFunctionEvaluations',1000, ...
+    'MaxIterations',100);
 
 % --- Run PI #1 (starting from best LHS candidate) -----------------------
 disp("Running PI1 with fmincon...")

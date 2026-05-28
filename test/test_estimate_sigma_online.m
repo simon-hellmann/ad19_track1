@@ -28,7 +28,7 @@ load(data_file, 'data_init');
 
 dt_mask    = 1/24;       % [d] exclusion half-width around each feeding event (±1 h)
 channels   = [1, 2, 4];  % output indices: gas_flow, p_CH4, pH
-chan_names  = {'gas_flow', 'p_CH4', 'pH'};
+chan_names  = {"gas_flow", "p_CH4", "pH"};
 
 %% Estimate sigma per channel
 
