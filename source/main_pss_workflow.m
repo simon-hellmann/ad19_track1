@@ -688,5 +688,5 @@ fprintf('%-30s  %.4f | %.4f\n', 'PI #1 (full set)',     RMSE1_auto, RMSE1_cv);
 fprintf('%-30s  %.4f | %.4f\n', 'PI #2 (PSS subset)',   RMSE2_auto, RMSE2_cv);
 
 % save workspace: 
-save(fprintf('/Users/simonhellmann/Documents/GIT/ad19_track1/data/generated/workspace_run%i.mat\n', run_id))
+save(sprintf(fullfile('..', 'data', 'generated', 'workspace_run%i.mat'), run_id))
  
