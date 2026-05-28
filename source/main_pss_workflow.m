@@ -36,7 +36,7 @@ clear; clc; close all;
 %  1. SETUP & PATHS
 % -----------------------------------------------------------------------
 
-run_id = 3; % document in list of runs (user's responsibility)
+run_id = 4; % document in list of runs (user's responsibility)
 
 % add subfolders (model files, helper functions, PSS routine, etc.)
 addpath('model_files');
@@ -687,6 +687,5 @@ fprintf('%-30s  Train  |  CV\n', 'Configuration');
 fprintf('%-30s  %.4f | %.4f\n', 'PI #1 (full set)',     RMSE1_auto, RMSE1_cv);
 fprintf('%-30s  %.4f | %.4f\n', 'PI #2 (PSS subset)',   RMSE2_auto, RMSE2_cv);
 
-% save workspace: 
-save(sprintf(fullfile('..', 'data', 'generated', 'workspace_run%i.mat'), run_id))
- 
+% save workspace:
+save(['../data/generated/workspace_run' num2str(run_id) '.mat']) 
