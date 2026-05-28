@@ -302,7 +302,7 @@ x0 = computeX0(theta0, data_init, t_ss, x0_init, odeFunc, odeOptsOpt, ...
 %    - Parameter 8 (Delta_S_ion, LB = -1e-2 < 0): linear scale.
 
 J_penalty   = 1e10;
-maxNumCores = feature('numCores');
+maxNumCores = 8;
 
 if flag_skip_lhs
     disp("LHS skipped — will start PI #1 from theta0.")
@@ -334,7 +334,7 @@ else
     end
     computing_time_lhs = toc(tic_lhs); % [s]
     fprintf("LHS done.  Cost range: [%.4g, %.4g]  (%.1f s)\n", min(J_lhs), max(J_lhs), computing_time_lhs);
-    delete(gcp('nocreate'));
+    % delete(gcp('nocreate'));
 
     % Best LHS candidate becomes the starting point for PI #1
     [J0_lhs, lhs_best_idx] = min(J_lhs);
@@ -400,7 +400,7 @@ opts1 = optimoptions('fmincon', ...
     'OptimalityTolerance',      20*gradient_noise_floor, ...   % above gradient noise floor:
     ...                                     %   only stop when slope is genuinely flat
     'TypicalX',                 ones(n_theta, 1), ...   % phi ~ O(1) for all params
-    'MaxFunctionEvaluations',   500, ...
+    'MaxFunctionEvaluations',   1000, ...
     'MaxIterations',            100);
 
 % --- Run PI #1 (starting from best LHS candidate) -----------------------
@@ -473,7 +473,6 @@ parfor k = 1:n_theta
 
     dydphi1_raw(:,k) = (y_fwd - y_bwd) ./ (2*h_phi);
 end
-delete(gcp('nocreate'))
 
 dydphi1_os = dydphi1_raw ./ scale_long;   % (N_long x n_theta): output-scaled phi-space sensitivity
 
@@ -631,7 +630,7 @@ parfor ki = 1:numel(keep_idx)
 
     dydphi2_raw(:,ki) = (y_fwd - y_bwd) ./ (2*h_phi);
 end
-delete(gcp('nocreate'))
+delete(gcp('nocreate')) % close parallel pool
 
 dydphi2_os = dydphi2_raw ./ scale_long;   % (N_long x numel(keep_idx)): output-scaled phi-space
 
@@ -688,5 +687,5 @@ fprintf('%-30s  %.4f | %.4f\n', 'PI #1 (full set)',     RMSE1_auto, RMSE1_cv);
 fprintf('%-30s  %.4f | %.4f\n', 'PI #2 (PSS subset)',   RMSE2_auto, RMSE2_cv);
 
 % save workspace:
-save(['../data/generated/workspace_run' num2str(run_id) '.mat']) 
-disp('  Saved workspace.')
+save(['../data/generated/workspace_run' num2str(run_id) '.mat']); disp('  Saved workspace.')
+disp('  End of code reached.')
