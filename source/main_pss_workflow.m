@@ -400,8 +400,8 @@ opts1 = optimoptions('fmincon', ...
     'OptimalityTolerance',      20*gradient_noise_floor, ...   % above gradient noise floor:
     ...                                     %   only stop when slope is genuinely flat
     'TypicalX',                 ones(n_theta, 1), ...   % phi ~ O(1) for all params
-    'MaxFunctionEvaluations',   5000, ...
-    'MaxIterations',            800);
+    'MaxFunctionEvaluations',   500, ...
+    'MaxIterations',            100);
 
 % --- Run PI #1 (starting from best LHS candidate) -----------------------
 disp("Running PI1 with fmincon...")
@@ -689,3 +689,4 @@ fprintf('%-30s  %.4f | %.4f\n', 'PI #2 (PSS subset)',   RMSE2_auto, RMSE2_cv);
 
 % save workspace:
 save(['../data/generated/workspace_run' num2str(run_id) '.mat']) 
+disp('  Saved workspace.')
